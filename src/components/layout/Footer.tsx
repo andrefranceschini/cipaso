@@ -95,7 +95,7 @@ export function Footer() {
             Arquivos oferecidos e disponibilizados pela Família Franceschini e Amigos, com o intuito de preservar a memória do <strong>Prof. Valter Álfredo Franceschini</strong>, parte da história da parapsicologia e da cidade de Sorocaba. O material é disponibilizado a todos, com o objetivo de possibilitar a melhoria da qualidade de vida e o conhecimento de seu trabalho.
           </p>
           <p className="pt-4">
-          <a href="https://lotvs.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-secondary transition-colors font-semibold">LOTVS©{currentYear}</a> | Todos os direitos reservados.
+          <a href="https://cipaso.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-secondary transition-colors font-semibold">CIPASO©{currentYear}</a> | Todos os direitos reservados.
           </p>
         </div>
       </div>
