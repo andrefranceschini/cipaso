@@ -1,117 +1,99 @@
 import { Helmet } from 'react-helmet-async'
 
+const SITE = 'https://cipaso.com'
+const DEFAULT_IMAGE = `${SITE}/og-image.png`
+const SITE_NAME = 'Memorial CIPASO'
+
 interface ArticleMetadata {
-  publishedTime?: string
+  publishedTime: string
   modifiedTime?: string
-  author?: string
+  author: string
+  section?: string
+  tags?: string[]
 }
 
 interface SEOProps {
   title: string
   description: string
-  canonical: string
-  ogImage?: string
-  ogType?: 'website' | 'article'
+  /** Caminho da rota, ex.: "/acervo". A URL canônica absoluta é montada aqui. */
+  path: string
+  image?: string
+  type?: 'website' | 'article'
   article?: ArticleMetadata
+  noindex?: boolean
 }
 
-export function SEO({
-  title,
-  description,
-  canonical,
-  ogImage = 'https://cipaso.com/favicon.svg',
-  ogType = 'website',
-  article
-}: SEOProps) {
-  const domain = 'https://cipaso.com'
+export function SEO({ title, description, path, image = DEFAULT_IMAGE, type = 'website', article, noindex }: SEOProps) {
+  const canonical = `${SITE}${path}`
+  const fullTitle = path === '/' ? title : `${title} — ${SITE_NAME}`
 
-  const schemaOrgWebPage = {
-    '@context': 'https://schema.org',
-    '@type': ogType === 'article' ? 'Article' : 'WebPage',
-    name: title,
-    description,
-    url: canonical,
-    image: ogImage,
-    ...(ogType === 'article' && {
-      author: {
-        '@type': 'Person',
-        name: article?.author || 'Memorial CIPASO'
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: 'Memorial CIPASO',
-        logo: {
-          '@type': 'ImageObject',
-          url: `${domain}/favicon.svg`
+  const schema =
+    type === 'article' && article
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: title,
+          description,
+          url: canonical,
+          image,
+          inLanguage: 'pt-BR',
+          datePublished: article.publishedTime,
+          dateModified: article.modifiedTime ?? article.publishedTime,
+          articleSection: article.section,
+          keywords: article.tags?.join(', '),
+          author: { '@type': 'Person', name: article.author },
+          publisher: {
+            '@type': 'Organization',
+            name: SITE_NAME,
+            logo: { '@type': 'ImageObject', url: `${SITE}/pwa-512x512.png` }
+          },
+          mainEntityOfPage: { '@type': 'WebPage', '@id': canonical }
         }
-      },
-      datePublished: article?.publishedTime || new Date().toISOString(),
-      dateModified: article?.modifiedTime || new Date().toISOString()
-    })
-  }
-
-  const schemaOrgOrganization = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Centro de Investigação Parapsicológica de Sorocaba',
-    alternateName: 'CIPASO',
-    url: domain,
-    logo: `${domain}/favicon.svg`,
-    description: 'Centro de investigação parapsicológica fundado em 1989 em Sorocaba/SP',
-    foundingDate: '1989',
-    dissolutionDate: '2016',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: 'Rua Oswaldo Segamarchi, 15',
-      addressLocality: 'Sorocaba',
-      addressRegion: 'SP',
-      postalCode: '',
-      addressCountry: 'BR'
-    },
-    founder: {
-      '@type': 'Person',
-      name: 'Valter Álfredo Franceschini',
-      birthDate: '1940-08-02',
-      deathDate: '2016-02-18'
-    }
-  }
+      : {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: title,
+          description,
+          url: canonical,
+          inLanguage: 'pt-BR',
+          isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: SITE }
+        }
 
   return (
-    <Helmet>
-      {/* Basic Meta Tags */}
-      <title>{title}</title>
+    <Helmet prioritizeSeoTags>
+      <title>{fullTitle}</title>
       <meta name="description" content={description} />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta charSet="utf-8" />
       <link rel="canonical" href={canonical} />
+      <meta
+        name="robots"
+        content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'}
+      />
 
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={ogType} />
+      <meta property="og:type" content={type} />
+      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:locale" content="pt_BR" />
       <meta property="og:url" content={canonical} />
-      <meta property="og:title" content={title} />
+      <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={ogImage} />
+      <meta property="og:image" content={image} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:site_name" content="Memorial CIPASO" />
-      <meta property="og:locale" content="pt_BR" />
+      <meta property="og:image:alt" content={`${SITE_NAME} — ${title}`} />
 
-      {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:url" content={canonical} />
-      <meta name="twitter:title" content={title} />
+      <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={ogImage} />
-      {/* <meta name="twitter:creator" content={twitterHandle} /> */}
+      <meta name="twitter:image" content={image} />
 
-      {/* Additional SEO */}
-      <meta name="language" content="pt-BR" />
-      <meta name="revisit-after" content="7 days" />
-      <meta name="author" content="Memorial CIPASO" />
+      {type === 'article' && article && (
+        <meta property="article:published_time" content={article.publishedTime} />
+      )}
+      {type === 'article' && article?.modifiedTime && (
+        <meta property="article:modified_time" content={article.modifiedTime} />
+      )}
+      {type === 'article' && article && <meta property="article:author" content={article.author} />}
 
-      {/* Schema.org JSON-LD */}
-      <script type="application/ld+json">{JSON.stringify(schemaOrgWebPage)}</script>
-      <script type="application/ld+json">{JSON.stringify(schemaOrgOrganization)}</script>
+      <script type="application/ld+json">{JSON.stringify(schema)}</script>
     </Helmet>
   )
 }

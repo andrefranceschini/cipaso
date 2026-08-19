@@ -1,46 +1,23 @@
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import { Quote } from 'lucide-react'
-import { getQuoteForDay, type Quote as QuoteType } from '@/data/quotes'
+import { getQuoteForDay } from '@/data/quotes'
 
 export function DailyQuote() {
-  const [quote, setQuote] = useState<QuoteType | null>(null)
-
-  useEffect(() => {
-    setQuote(getQuoteForDay())
-  }, [])
-
-  if (!quote) {
-    return null
-  }
+  const quote = getQuoteForDay()
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="relative bg-linear-to-br from-primary/10 to-accent/5 border border-primary/30 rounded-xl p-8 shadow-lg overflow-hidden"
-    >
-      {/* Ícone decorativo */}
-      <Quote className="absolute top-4 right-4 h-16 w-16 text-primary/10 fill-primary/10" />
+    <figure className="sheet paper-grain flex h-full flex-col justify-between p-7">
+      <figcaption className="eyebrow">Citação do dia</figcaption>
 
-      {/* Título */}
-      <h3 className="text-sm uppercase tracking-wide text-primary font-semibold mb-4">
-        Citação do Dia
-      </h3>
-
-      {/* Conteúdo da citação */}
-      <blockquote className="relative z-10">
-        <p className="text-lg md:text-xl leading-relaxed mb-4 italic text-fg">
-          "{quote.content}"
-        </p>
-        <cite className="text-sm text-muted-fg not-italic font-medium">
-          — {quote.author}
-        </cite>
+      <blockquote className="mt-6 font-display text-2xl leading-[1.25] text-ink sm:text-[1.75rem]">
+        <span aria-hidden="true" className="text-brand">
+          “
+        </span>
+        {quote.content}
+        <span aria-hidden="true" className="text-brand">
+          ”
+        </span>
       </blockquote>
 
-      {/* Decoração de fundo */}
-      <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
-    </motion.div>
+      <p className="mt-6 border-t border-rule pt-4 text-sm text-muted">{quote.author}</p>
+    </figure>
   )
 }

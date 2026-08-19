@@ -1,83 +1,49 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
-/**
- * Helper para combinar classes Tailwind com merge inteligente
- * Evita conflitos de classes (ex: 'px-2 px-4' → 'px-4')
- */
+/** Combina classes Tailwind resolvendo conflitos (ex.: 'px-2 px-4' → 'px-4'). */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+const longDate = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+const shortDate = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+
 /**
- * Formata data para pt-BR
+ * Datas do acervo e dos artigos vêm como YYYY-MM-DD. Interpretar com `new Date`
+ * direto usa UTC e pode voltar um dia no fuso do Brasil — por isso o parse manual.
  */
-export function formatDate(date: string | Date, style: 'short' | 'long' = 'short'): string {
-  const d = typeof date === 'string' ? new Date(date) : date
+function parseIsoDate(value: string): Date | null {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (!match) return null
 
-  if (style === 'long') {
-    return d.toLocaleDateString('pt-BR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    })
-  }
-
-  return d.toLocaleDateString('pt-BR')
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+  return Number.isNaN(date.getTime()) ? null : date
 }
 
-/**
- * Trunca texto com reticências
- */
-export function truncate(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
-  return text.slice(0, maxLength).trim() + '...'
+export function formatDate(value: string | null, style: 'short' | 'long' = 'long'): string {
+  if (!value) return 'Data não catalogada'
+
+  const date = parseIsoDate(value)
+  if (!date) return 'Data não catalogada'
+
+  return style === 'long' ? longDate.format(date) : shortDate.format(date)
 }
 
-/**
- * Formata tamanho de arquivo (bytes para KB/MB)
- */
 export function formatFileSize(bytes: number | null): string {
-  if (!bytes) return 'Tamanho desconhecido'
-
+  if (!bytes || bytes < 0) return '—'
   if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-/**
- * Gera slug a partir de string
- */
 export function slugify(text: string): string {
   return text
-    .toString()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\p{Diacritic}/gu, '')
     .toLowerCase()
     .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '')
-    .replace(/--+/g, '-')
-}
-
-/**
- * Debounce para inputs de busca
- */
-export function debounce<T extends (...args: unknown[]) => unknown>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: ReturnType<typeof setTimeout> | null = null
-
-  return function executedFunction(...args: Parameters<T>) {
-    const later = () => {
-      timeout = null
-      func(...args)
-    }
-
-    if (timeout) {
-      clearTimeout(timeout)
-    }
-    timeout = setTimeout(later, wait)
-  }
+    .replace(/-+/g, '-')
 }

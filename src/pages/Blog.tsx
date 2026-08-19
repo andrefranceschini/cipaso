@@ -1,127 +1,179 @@
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Search, X } from 'lucide-react'
 import { SEO } from '@/components/SEO'
-import { BlogCard } from '@/components/blog/BlogCard'
-import { getAllPosts, getPostsByCategory, type BlogPostCategory } from '@/data/blog'
+import { Reveal } from '@/components/motion/Reveal'
+import { Button } from '@/components/ui/Button'
+import { CATEGORY_LABELS, getAllPosts, type BlogPostCategory } from '@/data/blog'
+import { cn, formatDate } from '@/lib/utils'
+
+type Filter = BlogPostCategory | 'todos'
+
+const filters: Array<{ value: Filter; label: string }> = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'pesquisa', label: CATEGORY_LABELS.pesquisa },
+  { value: 'desenvolvimento', label: CATEGORY_LABELS.desenvolvimento },
+  { value: 'institucional', label: CATEGORY_LABELS.institucional }
+]
 
 export function Blog() {
-  const [selectedCategory, setSelectedCategory] = useState<BlogPostCategory | 'todos'>('todos')
-  const [searchQuery, setSearchQuery] = useState('')
+  const posts = getAllPosts()
+  const [category, setCategory] = useState<Filter>('todos')
+  const [query, setQuery] = useState('')
 
-  const allPosts = getAllPosts()
+  const results = useMemo(() => {
+    const normalized = query.trim().toLowerCase()
 
-  const filteredPosts = useMemo(() => {
-    let posts = selectedCategory === 'todos'
-      ? allPosts
-      : getPostsByCategory(selectedCategory)
+    return posts.filter(post => {
+      if (category !== 'todos' && post.categoria !== category) return false
+      if (!normalized) return true
 
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      posts = posts.filter(post =>
-        post.titulo.toLowerCase().includes(query) ||
-        post.resumo.toLowerCase().includes(query) ||
-        post.tags.some(tag => tag.toLowerCase().includes(query))
+      return (
+        post.titulo.toLowerCase().includes(normalized) ||
+        post.resumo.toLowerCase().includes(normalized) ||
+        post.tags.some(tag => tag.toLowerCase().includes(normalized))
       )
-    }
-
-    return posts
-  }, [selectedCategory, searchQuery])
-
-  const categories: Array<{ value: BlogPostCategory | 'todos'; label: string }> = [
-    { value: 'todos', label: 'Todos' },
-    { value: 'pesquisa', label: 'Pesquisa' },
-    { value: 'desenvolvimento', label: 'Desenvolvimento' },
-    { value: 'institucional', label: 'Institucional' }
-  ]
+    })
+  }, [posts, category, query])
 
   return (
     <>
       <SEO
-        title="Blog - Memorial CIPASO"
-        description="Artigos, reflexões e conteúdos sobre parapsicologia, desenvolvimento humano e o legado do CIPASO."
-        canonical="https://cipaso.com/blog"
-        ogImage="https://cipaso.com/favicon.svg"
-        ogType="website"
+        title="Artigos"
+        description="Colunas e textos do Prof. Valter Franceschini sobre parapsicologia, reprogramação mental e desenvolvimento humano, transcritos do acervo do CIPASO."
+        path="/blog"
       />
 
-      <div className="bg-accent/5 border-b border-border">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Blog</h1>
-          <p className="text-lg text-muted-fg max-w-2xl">
-            Artigos, reflexões e conteúdos sobre parapsicologia, desenvolvimento humano e pesquisa baseados nos ensinamentos do Prof. Valter Franceschini.
-          </p>
+      <section className="border-b border-rule paper-grain">
+        <div className="container-editorial py-14">
+          <Reveal immediate>
+            <p className="eyebrow">Textos do acervo</p>
+            <h1 className="mt-5 font-display text-[clamp(2.5rem,7vw,3.75rem)] leading-none text-ink">Artigos</h1>
+            <p className="mt-6 max-w-2xl text-lg text-muted">
+              Colunas publicadas na imprensa de Sorocaba e materiais didáticos do CIPASO, transcritos e
+              organizados por tema.
+            </p>
+          </Reveal>
         </div>
-      </div>
+      </section>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="space-y-8">
-          <div className="flex flex-col gap-4">
-            <div className="relative">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-fg"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <input
-                type="text"
-                placeholder="Buscar artigos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-bg border border-border rounded-lg text-fg placeholder-muted-fg focus:outline-none focus:border-accent"
+      <div className="container-editorial py-10">
+        <div className="grid gap-5 border-b border-rule pb-6 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <label htmlFor="busca-artigos" className="eyebrow block">
+              Buscar artigos
+            </label>
+            <div className="relative mt-3">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-faint"
+                aria-hidden="true"
               />
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {categories.map(category => (
+              <input
+                id="busca-artigos"
+                type="search"
+                value={query}
+                onChange={event => setQuery(event.target.value)}
+                placeholder="Título, resumo ou tema"
+                className="w-full border border-rule bg-raised py-2.5 pl-9 pr-9 text-ink placeholder:text-faint focus:border-brand-ink focus:outline-none"
+              />
+              {query && (
                 <button
-                  key={category.value}
-                  onClick={() => setSelectedCategory(category.value as BlogPostCategory | 'todos')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    selectedCategory === category.value
-                      ? 'bg-accent text-accent-fg'
-                      : 'bg-bg border border-border text-fg hover:border-accent'
-                  }`}
+                  type="button"
+                  onClick={() => setQuery('')}
+                  aria-label="Limpar busca"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-muted hover:text-ink"
                 >
-                  {category.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {filteredPosts.length > 0 ? (
-            <>
-              <div className="text-sm text-muted-fg">
-                {filteredPosts.length} {filteredPosts.length === 1 ? 'artigo' : 'artigos'} encontrado(s)
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredPosts.map(post => (
-                  <BlogCard key={post.id} post={post} />
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-16">
-              <p className="text-muted-fg text-lg mb-4">
-                {searchQuery ? 'Nenhum artigo encontrado com essa busca.' : 'Nenhum artigo disponível nessa categoria.'}
-              </p>
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="text-accent font-semibold hover:underline"
-                >
-                  Limpar busca
+                  <X className="h-4 w-4" />
                 </button>
               )}
             </div>
-          )}
+          </div>
+
+          <fieldset>
+            <legend className="eyebrow">Tema</legend>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {filters.map(filter => {
+                const isActive = category === filter.value
+
+                return (
+                  <button
+                    key={filter.value}
+                    type="button"
+                    onClick={() => setCategory(filter.value)}
+                    aria-pressed={isActive}
+                    className={cn(
+                      'border px-3 py-1.5 text-sm transition-colors',
+                      isActive
+                        ? 'border-brand-ink bg-brand-ink text-on-brand-ink'
+                        : 'border-rule text-muted hover:border-brand-ink hover:text-ink'
+                    )}
+                  >
+                    {filter.label}
+                  </button>
+                )
+              })}
+            </div>
+          </fieldset>
         </div>
+
+        <p aria-live="polite" className="mt-6 text-sm text-muted tabular">
+          {results.length === 0
+            ? 'Nenhum artigo encontrado.'
+            : `${results.length} ${results.length === 1 ? 'artigo' : 'artigos'}`}
+        </p>
+
+        {results.length > 0 ? (
+          <ol className="mt-4 border-t border-rule">
+            {results.map((post, index) => (
+              <Reveal as="li" key={post.slug} delay={Math.min(index * 0.04, 0.24)}>
+                <article className="border-b border-rule">
+                  <Link
+                    to={`/blog/${post.slug}`}
+                    className="group grid gap-3 py-8 md:grid-cols-[10rem_1fr] md:gap-10"
+                  >
+                    <div className="flex flex-col gap-1 text-xs text-muted">
+                      <time dateTime={post.data} className="tabular">
+                        {formatDate(post.data)}
+                      </time>
+                      <span className="eyebrow text-brand-ink">{CATEGORY_LABELS[post.categoria]}</span>
+                      <span className="tabular">{post.tempoLeitura} min de leitura</span>
+                    </div>
+
+                    <div>
+                      <h2 className="font-display text-2xl leading-tight text-ink transition-colors group-hover:text-brand-ink sm:text-3xl">
+                        {post.titulo}
+                      </h2>
+                      <p className="mt-3 text-muted measure">{post.resumo}</p>
+
+                      {post.tags.length > 0 && (
+                        <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-faint">
+                          {post.tags.map(tag => (
+                            <li key={tag}>#{tag}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </Link>
+                </article>
+              </Reveal>
+            ))}
+          </ol>
+        ) : (
+          <div className="mt-10 border border-rule bg-raised p-10 text-center">
+            <p className="text-muted">Nada corresponde a essa busca.</p>
+            <div className="mt-5">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setQuery('')
+                  setCategory('todos')
+                }}
+              >
+                Limpar filtros
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   )

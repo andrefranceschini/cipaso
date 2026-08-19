@@ -2,15 +2,98 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <title>Memorial CIPASO — Centro de Investigação Parapsicológica de Sorocaba</title>
+    <meta
+      name="description"
+      content="Memorial digital do CIPASO: acervo de 240 publicações digitalizadas, artigos e registros do Prof. Valter Franceschini sobre parapsicologia científica e reprogramação mental."
+    />
+    <link rel="canonical" href="https://cipaso.com/" />
+
+    <meta name="author" content="Memorial CIPASO" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f7f4ef" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Memorial CIPASO" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:title" content="Memorial CIPASO — Centro de Investigação Parapsicológica de Sorocaba" />
+    <meta
+      property="og:description"
+      content="Acervo digital, artigos e memória do CIPASO e do Prof. Valter Franceschini."
+    />
+    <meta property="og:url" content="https://cipaso.com/" />
+    <meta property="og:image" content="https://cipaso.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Memorial Digital do CIPASO - Centro de Investigação Parapsicológica de Sorocaba. Acervo histórico de parapsicologia científica e reprogramação mental positiva." />
-    <meta name="keywords" content="CIPASO, parapsicologia, Sorocaba, Valter Franceschini, reprogramação mental" />
-    <meta name="theme-color" content="#E9A356" />
-    <title>Memorial CIPASO - Centro de Investigação Parapsicológica de Sorocaba</title>
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Centro de Investigação Parapsicológica de Sorocaba",
+        "alternateName": "CIPASO",
+        "url": "https://cipaso.com",
+        "logo": "https://cipaso.com/og-image.png",
+        "foundingDate": "1989",
+        "dissolutionDate": "2016",
+        "email": "contato@cipaso.com",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Rua Oswaldo Segamarchi, 15",
+          "addressLocality": "Sorocaba",
+          "addressRegion": "SP",
+          "addressCountry": "BR"
+        },
+        "founder": {
+          "@type": "Person",
+          "name": "Valter Álfredo Franceschini",
+          "birthDate": "1940-08-02",
+          "deathDate": "2016-02-18"
+        }
+      }
+    </script>
+
+    <script>
+      // Aplica o tema antes da primeira pintura: evita o flash de tela clara.
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('theme')
+          var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
+          if (dark) document.documentElement.classList.add('dark')
+          var meta = document.querySelector('meta[name="theme-color"]')
+          if (meta) meta.setAttribute('content', dark ? '#101315' : '#f7f4ef')
+        } catch (error) {
+          /* localStorage bloqueado: segue com o tema claro */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="padding: 2rem; font-family: system-ui, sans-serif; max-width: 40rem; margin: 0 auto">
+        <h1>Memorial CIPASO</h1>
+        <p>
+          Este memorial digital precisa de JavaScript para exibir o acervo. Ative o JavaScript ou acesse
+          diretamente as publicações em
+          <a href="/sitemap-pdfs.xml">/sitemap-pdfs.xml</a>.
+        </p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,183 +1,139 @@
-import { motion } from 'framer-motion'
 import { SEO } from '@/components/SEO'
+import { Reveal } from '@/components/motion/Reveal'
+
+const sections = [
+  {
+    id: 'aviso',
+    title: 'Aviso legal',
+    paragraphs: [
+      'O Memorial Digital CIPASO preserva a memória e o legado do Prof. Valter Álfredo Franceschini e do Centro de Investigação Parapsicológica de Sorocaba (CIPASO).',
+      'O site é mantido com finalidade educacional, histórica e informativa. Os documentos, imagens, áudios e vídeos são cedidos pela Família Franceschini e por amigos.',
+      'CIPASO e Parâmetros Holísticos estão inativos. Nada aqui constitui oferta de serviço, consulta, diagnóstico ou tratamento de saúde.'
+    ]
+  },
+  {
+    id: 'conteudo',
+    title: 'Sobre o conteúdo',
+    paragraphs: [
+      'Os arquivos são disponibilizados para consulta, estudo e preservação da memória do trabalho do Prof. Valter Franceschini.',
+      'Os direitos de propriedade intelectual dos materiais históricos pertencem aos seus respectivos titulares. A reprodução ou distribuição sem autorização prévia é proibida, exceto para fins educacionais e não comerciais, com citação da fonte.'
+    ]
+  },
+  {
+    id: 'direitos',
+    title: 'Direitos autorais',
+    paragraphs: [
+      'O design e o desenvolvimento deste memorial são de autoria de André Franceschini e estão protegidos por direitos autorais.',
+      'Os materiais históricos conservam seus direitos originais. Qualquer uso comercial requer autorização prévia da Família Franceschini.'
+    ]
+  },
+  {
+    id: 'responsabilidade',
+    title: 'Isenção de responsabilidade',
+    paragraphs: [
+      'As informações são fornecidas no estado em que se encontram, sem garantias de qualquer natureza. O memorial não se responsabiliza por interrupções de acesso, perdas decorrentes do uso do site, conteúdo de terceiros ou eventuais imprecisões nos materiais históricos.'
+    ]
+  },
+  {
+    id: 'privacidade',
+    title: 'Privacidade e armazenamento local',
+    paragraphs: [
+      'Este site não possui formulários, não cria contas e não coleta dados pessoais identificáveis.',
+      'O navegador guarda localmente apenas a preferência de tema (claro ou escuro). Nenhum dado é enviado a terceiros e não há rastreamento publicitário.',
+      'Um service worker armazena arquivos do site em cache para permitir carregamento mais rápido e leitura offline. Esse cache pode ser apagado a qualquer momento nas configurações do navegador.'
+    ]
+  },
+  {
+    id: 'uso',
+    title: 'Condições de uso',
+    list: [
+      'Usar o site apenas para fins lícitos.',
+      'Respeitar os direitos de propriedade intelectual de terceiros.',
+      'Não tentar contornar medidas de segurança.',
+      'Não realizar downloads massivos automatizados do acervo.'
+    ]
+  }
+]
 
 export function Legal() {
   return (
     <>
       <SEO
-        title="Termos de Uso - Memorial CIPASO"
-        description="Termos de uso, política de privacidade e aviso legal do Memorial Digital CIPASO."
-        canonical="https://cipaso.com/termos"
-        ogImage="https://cipaso.com/favicon.svg"
-        ogType="website"
+        title="Termos & privacidade"
+        description="Aviso legal, direitos autorais, isenção de responsabilidade e política de privacidade do Memorial Digital CIPASO."
+        path="/termos"
       />
-      <div className="min-h-screen bg-bg py-20">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-        {/* Título */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-16"
-        >
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 text-fg">
-            Termos & Legal
-          </h1>
-          <p className="text-xl text-muted-fg">
-            Informações importantes sobre o uso do Memorial Digital CIPASO
-          </p>
-        </motion.div>
 
-        {/* Conteúdo */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="space-y-12 text-muted-fg"
-        >
-          {/* Aviso Legal */}
-          <section className="space-y-4">
-            <h2 className="text-3xl font-bold text-fg">Aviso Legal</h2>
-            <p className="leading-relaxed">
-              O Memorial Digital CIPASO é um projeto dedicado à preservação da memória e legado do
-              <strong> Prof. Valter Álfredo Franceschini</strong> e do
-              <strong> Centro de Investigação Parapsicológica de Sorocaba (CIPASO)</strong>.
+      <section className="border-b border-rule paper-grain">
+        <div className="container-editorial py-14">
+          <Reveal immediate>
+            <p className="eyebrow">Documentação</p>
+            <h1 className="mt-5 font-display text-[clamp(2.5rem,7vw,3.75rem)] leading-none text-ink">Termos & privacidade</h1>
+            <p className="mt-6 max-w-2xl text-lg text-muted">
+              Como este memorial é mantido, o que pode ser reutilizado e quais dados o site guarda.
             </p>
-            <p className="leading-relaxed">
-              Este site é mantido com fins educacionais, históricos e informativos. Os materiais, documentos,
-              imagens, áudios e vídeos disponibilizados são oferecidos pela Família Franceschini e Amigos com
-              o intuito de preservar essa importante parte da história da parapsicologia.
-            </p>
-          </section>
+          </Reveal>
+        </div>
+      </section>
 
-          {/* Sobre o Conteúdo */}
-          <section className="space-y-4">
-            <h2 className="text-3xl font-bold text-fg">Sobre o Conteúdo</h2>
-            <p className="leading-relaxed">
-              Todos os arquivos disponibilizados neste site (textos, imagens, áudios, vídeos, publicações e jornais)
-              são oferecidos com o objetivo de possibilitar a melhoria da qualidade de vida e o conhecimento do
-              trabalho desenvolvido pelo Prof. Valter Franceschini.
-            </p>
-            <p className="leading-relaxed">
-              Os direitos de propriedade intelectual dos materiais históricos pertencem aos seus respectivos
-              proprietários. A reprodução ou distribuição desses materiais sem autorização prévia é proibida,
-              exceto para fins educacionais e não comerciais.
-            </p>
-          </section>
-
-          {/* Direitos Autorais */}
-          <section className="space-y-4">
-            <h2 className="text-3xl font-bold text-fg">Direitos Autorais & Propriedade Intelectual</h2>
-            <p className="leading-relaxed">
-              O design e desenvolvimento do Memorial Digital foram realizados por
-              <strong> André Franceschini</strong>. O código-fonte e design do site são protegidos por direitos autorais.
-            </p>
-            <p className="leading-relaxed">
-              Os materiais históricos (documentos, fotografias, vídeos, etc.) conservam seus direitos originais.
-              Qualquer utilização comercial desses materiais requer autorização prévia da Família Franceschini.
-            </p>
-          </section>
-
-          {/* Isenção de Responsabilidade */}
-          <section className="space-y-4">
-            <h2 className="text-3xl font-bold text-fg">Isenção de Responsabilidade</h2>
-            <p className="leading-relaxed">
-              As informações contidas neste site são fornecidas "como estão", sem garantias de qualquer tipo,
-              explícitas ou implícitas. O Memorial Digital CIPASO não se responsabiliza por:
-            </p>
-            <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Interrupções ou erros no acesso ao site</li>
-              <li>Perda de dados ou danos decorrentes do uso do site</li>
-              <li>Links para sites externos ou conteúdo de terceiros</li>
-              <li>Imprecisões ou omissões no conteúdo histórico</li>
-            </ul>
-          </section>
-
-          {/* Privacidade */}
-          <section className="space-y-4">
-            <h2 className="text-3xl font-bold text-fg">Privacidade</h2>
-            <p className="leading-relaxed">
-              O Memorial Digital CIPASO respeita sua privacidade. Este site não coleta informações pessoais
-              identificáveis sem o seu consentimento explícito. Cookies podem ser utilizados para melhorar
-              a experiência de navegação e manter consistência nas seleções de conteúdo diário.
-            </p>
-            <p className="leading-relaxed">
-              O uso de dados de navegação é feito apenas com fins analíticos e não é compartilhado com terceiros.
-            </p>
-          </section>
-
-          {/* Cookies */}
-          <section className="space-y-4">
-            <h2 className="text-3xl font-bold text-fg">Cookies e Armazenamento Local</h2>
-            <p className="leading-relaxed">
-              Este site utiliza cookies e localStorage para:
-            </p>
-            <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Manter a preferência de tema (claro/escuro)</li>
-              <li>Assegurar consistência nas citações e arquivos diários</li>
-              <li>Melhorar a experiência de navegação</li>
-            </ul>
-            <p className="leading-relaxed">
-              Você pode desabilitar cookies nas configurações do seu navegador, porém isso pode afetar a
-              experiência de uso do site.
-            </p>
-          </section>
-
-          {/* Uso do Site */}
-          <section className="space-y-4">
-            <h2 className="text-3xl font-bold text-fg">Condições de Uso</h2>
-            <p className="leading-relaxed">
-              Ao acessar e utilizar o Memorial Digital CIPASO, você concorda com:
-            </p>
-            <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Usar o site apenas para fins lícitos e legais</li>
-              <li>Não transmitir conteúdo ofensivo, ilegal ou prejudicial</li>
-              <li>Respeitar os direitos de propriedade intelectual de terceiros</li>
-              <li>Não tentar contornar medidas de segurança do site</li>
-              <li>Não realizar downloads massivos de conteúdo sem autorização</li>
-            </ul>
-          </section>
-
-          {/* Contato */}
-          <section className="space-y-4">
-            <h2 className="text-3xl font-bold text-fg">Contribuições e Contato</h2>
-            <p className="leading-relaxed">
-              Possui materiais, histórias, ou mensagens positivas para contribuir? Entre em contato conosco:
-            </p>
-            <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 space-y-2">
-              <p>
-                <strong className="text-fg">Email:</strong>{' '}
-                <a
-                  href="mailto:contato@andrefranceschini.com.br"
-                  className="text-primary hover:text-secondary transition-colors"
-                >
-                  contato@andrefranceschini.com.br
+      <div className="container-editorial grid gap-12 py-14 lg:grid-cols-[16rem_1fr] lg:gap-16">
+        <nav aria-label="Sumário" className="lg:sticky lg:top-28 lg:self-start">
+          <h2 className="eyebrow">Sumário</h2>
+          <ol className="mt-4 space-y-2 text-sm">
+            {sections.map((section, index) => (
+              <li key={section.id} className="flex gap-3">
+                <span className="tabular text-faint">{String(index + 1).padStart(2, '0')}</span>
+                <a href={`#${section.id}`} className="link-ink">
+                  {section.title}
                 </a>
-              </p>
-              <p>
-                <strong className="text-fg">Telefone:</strong>{' '}
-                <a
-                  href="tel:+5515997234932"
-                  className="text-primary hover:text-secondary transition-colors"
-                >
-                  +55 (15) 99723-4932
-                </a>
-              </p>
-            </div>
-          </section>
+              </li>
+            ))}
+          </ol>
+        </nav>
 
-          {/* Última Atualização */}
-          <section className="space-y-4 pt-8 border-t border-muted">
-            <p className="text-sm text-muted-fg italic">
-              Última atualização: {new Date().toLocaleDateString('pt-BR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+        <div className="space-y-14">
+          {sections.map((section, index) => (
+            <Reveal as="section" key={section.id} id={section.id}>
+              <h2 className="border-t border-rule pt-5 font-display text-2xl text-ink">
+                <span className="eyebrow tabular mr-3 text-brand-ink">{String(index + 1).padStart(2, '0')}</span>
+                {section.title}
+              </h2>
+
+              {section.paragraphs?.map(paragraph => (
+                <p key={paragraph.slice(0, 40)} className="mt-4 leading-relaxed text-muted measure">
+                  {paragraph}
+                </p>
+              ))}
+
+              {section.list && (
+                <ul className="mt-4 space-y-2 text-muted">
+                  {section.list.map(item => (
+                    <li key={item} className="flex gap-3">
+                      <span aria-hidden="true" className="text-brand-ink">
+                        —
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Reveal>
+          ))}
+
+          <section className="border-t border-rule pt-8">
+            <h2 className="eyebrow">Contato</h2>
+            <p className="mt-4 text-muted">
+              Para contribuições, correções ou pedidos de remoção de material:{' '}
+              <a href="mailto:contato@cipaso.com" className="link-ink">
+                contato@cipaso.com
+              </a>{' '}
+              ·{' '}
+              <a href="tel:+5515997234932" className="link-ink tabular">
+                +55 (15) 99723-4932
+              </a>
             </p>
           </section>
-        </motion.div>
-      </div>
+        </div>
       </div>
     </>
   )

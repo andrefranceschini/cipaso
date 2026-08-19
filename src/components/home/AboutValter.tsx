@@ -1,121 +1,80 @@
-import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import valterPhoto from '@/assets/png/vaf/VAF-1.jpg'
+import { Reveal } from '@/components/motion/Reveal'
+import { SectionHeading } from '@/components/ui/SectionHeading'
+
+const tools = [
+  'Relaxamento e meditação guiada',
+  'Visualização criativa e reprogramação mental',
+  'Técnicas de autocura e autoconhecimento',
+  'Vivência prática das Leis da Mente',
+  'Investigação de fenômenos PSI'
+]
 
 export function AboutValter() {
   return (
-    <section className="py-20 bg-linear-to-b from-bg to-primary/5">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-5xl mx-auto"
-        >
-          {/* Título da Seção */}
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Prof. Valter Franceschini
-            </h2>
-            <p className="text-xl text-muted-fg italic">
-              In Memoriam — Mentor e Visionário
-            </p>
-          </div>
+    <section className="container-editorial py-20" aria-labelledby="valter">
+      <Reveal>
+        <SectionHeading
+          index="02"
+          eyebrow="In memoriam"
+          title={<span id="valter">Prof. Valter Álfredo Franceschini</span>}
+          description="Escritor, conferencista, parapsicólogo e professor. Idealizador do CIPASO e autor da metodologia que o memorial preserva."
+        />
+      </Reveal>
 
-          {/* Conteúdo Principal */}
-          <div className="space-y-12">
-            {/* Foto + Biografia */}
-            <div className="grid lg:grid-cols-[1fr_1.2fr] gap-12 items-start mb-0">
-              {/* Biografia */}
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="space-y-6"
-              >
-                <p className="text-lg leading-relaxed">
-                  <strong className="text-primary">Escritor, conferencista, parapsicólogo,</strong>{' '}
-                  professor e operador dos fenômenos PSI. O Prof. Valter Franceschini foi o
-                  idealizador e mentor espiritual do CIPASO.
-                </p>
+      <div className="mt-12 grid gap-12 lg:grid-cols-[minmax(0,24rem)_1fr] lg:gap-16">
+        <Reveal>
+          <figure>
+            <img
+              src={valterPhoto}
+              alt="Retrato do Prof. Valter Álfredo Franceschini"
+              width={384}
+              height={512}
+              loading="lazy"
+              decoding="async"
+              className="w-full border border-rule bg-sunken object-cover grayscale transition-[filter] duration-700 hover:grayscale-0"
+            />
+            <figcaption className="mt-3 flex justify-between border-t border-rule pt-3 text-xs text-muted tabular">
+              <span>Campinas, 02.08.1940</span>
+              <span>Sorocaba, 18.02.2016</span>
+            </figcaption>
+          </figure>
+        </Reveal>
 
-                <p className="text-lg leading-relaxed">
-                  Sua visão pioneira de unir <strong>ciência e humanismo</strong> moldou toda a
-                  filosofia institucional do Centro de Investigação Parapsicológica de Sorocaba.
-                </p>
+        <Reveal delay={0.08} className="space-y-6">
+          <p className="text-lg leading-relaxed text-ink measure">
+            Com mais de 55 anos de magistério, o Prof. Valter uniu <strong>investigação científica</strong> e{' '}
+            <strong>desenvolvimento humano</strong> em um método próprio de trabalho com a mente — aplicado em
+            atendimentos, cursos e nas colunas que publicou na imprensa de Sorocaba.
+          </p>
 
-                {/* Citação Destaque */}
-                <blockquote className="border-l-4 border-primary pl-6 py-4 bg-primary/5 rounded-r-lg my-8">
-                  <p className="text-lg italic mb-2">
-                    "O seu corpo reage de acordo com como age a sua mente."
-                  </p>
-                  <cite className="text-sm text-muted-fg not-italic">
-                    — Prof. Valter Franceschini
-                  </cite>
-                </blockquote>
-              </motion.div>
+          <blockquote className="border-l-2 border-brand pl-5 font-display text-xl leading-snug text-ink">
+            “O seu corpo reage de acordo com como age a sua mente.”
+          </blockquote>
 
-              {/* Fotografia */}
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="relative"
-              >
-                <div className="w-full rounded-lg overflow-hidden shadow-2xl border-4 border-primary/20">
-                  <img
-                    src={valterPhoto}
-                    alt="Prof. Valter Franceschini"
-                    className="w-full h-auto grayscale object-contain hover:grayscale-0 transition-all duration-500"
-                  />
-                </div>
+          <p className="text-muted measure">
+            Sua metodologia se apoia nas cinco ferramentas mentais, trabalhadas nos níveis cerebrais beta, alfa,
+            teta e delta:
+          </p>
 
-                {/* Decoração */}
-                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-primary/10 rounded-lg -z-10 hidden sm:block" />
-              </motion.div>
-            </div>
+          <ol className="divide-y divide-rule border-y border-rule">
+            {tools.map((tool, index) => (
+              <li key={tool} className="flex gap-4 py-3">
+                <span className="eyebrow tabular pt-1 text-brand-ink">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span className="text-ink">{tool}</span>
+              </li>
+            ))}
+          </ol>
 
-            <p className="text-center text-sm text-muted-fg italic mt-2 mb-16 w-full">
-              Seu trabalho continua vivo através deste memorial digital e das centenas de
-              alunos que formou ao longo de décadas de magistério.
-            </p>
-
-            {/* 5 Ferramentas Mentais em Row */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="space-y-4"
-            >
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold mb-2 text-fg">5 Ferramentas Mentais</h3>
-                <p className="text-muted-fg">
-                  Metodologia desenvolvida pelo Prof. Valter para programação mental nos níveis cerebrais (beta, alfa, teta e delta):
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                {[
-                  'Relaxamento e meditação guiada',
-                  'Visualização criativa e reprogramação mental',
-                  'Técnicas de autocura e autoconhecimento',
-                  'Vivência prática das Leis da Mente',
-                  'Investigação e desenvolvimento de fenômenos PSI'
-                ].map((ferramenta, index) => (
-                  <div key={index} className="bg-bg border border-primary/20 rounded-lg p-4 text-center">
-                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/20 text-primary font-bold mx-auto mb-3">
-                      {index + 1}
-                    </div>
-                    <p className="text-sm font-medium text-fg">{ferramenta}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
+          <p>
+            <Link to="/sobre" className="link-ink text-sm">
+              Ler a história completa do CIPASO
+            </Link>
+          </p>
+        </Reveal>
       </div>
     </section>
   )

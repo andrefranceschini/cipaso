@@ -1,289 +1,229 @@
+import { Link } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
+import { SEO } from '@/components/SEO'
+import { Reveal } from '@/components/motion/Reveal'
+import { SectionHeading } from '@/components/ui/SectionHeading'
+import { ButtonLink } from '@/components/ui/Button'
 import { DailyQuote } from '@/components/home/DailyQuote'
 import { FeaturedFile } from '@/components/home/FeaturedFile'
 import { FeaturedVideo } from '@/components/home/FeaturedVideo'
 import { AboutValter } from '@/components/home/AboutValter'
-import { SEO } from '@/components/SEO'
-import { motion } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
-import { ArrowRightIcon, BookOpenIcon, UsersIcon, DocumentTextIcon } from '@heroicons/react/24/solid'
-import { Link } from 'react-router-dom'
-import { getRecentPosts } from '@/data/blog'
+import { getAllPosts, getRecentPosts, CATEGORY_LABELS } from '@/data/blog'
+import { getAllFiles } from '@/data/files'
+import { formatDate } from '@/lib/utils'
+
+const values = [
+  {
+    term: 'Investigação',
+    definition: 'Estudo experimental e classificação dos fenômenos exteriorizados pela paranormalidade.'
+  },
+  {
+    term: 'Reprogramação',
+    definition: 'Trabalho consciente sobre os padrões mentais para segurança emocional e saúde.'
+  },
+  {
+    term: 'Comunidade',
+    definition: 'Fortalecimento dos vínculos familiares e comunitários como base do desenvolvimento.'
+  },
+  {
+    term: 'Divulgação',
+    definition: 'Educação acessível, sem hermetismo, para quem quiser estudar o material.'
+  }
+]
 
 export function Home() {
-  const recentPosts = getRecentPosts(3)
+  const posts = getRecentPosts(4)
+  const totalFiles = getAllFiles().length
 
   return (
     <>
       <SEO
-        title="Memorial CIPASO - Centro de Investigação Parapsicológica de Sorocaba"
-        description="Acervo histórico e memorial digital do CIPASO. Parapsicologia científica, reprogramação mental positiva e legado do Prof. Valter Franceschini."
-        canonical="https://cipaso.com/"
-        ogImage="https://cipaso.com/favicon.svg"
-        ogType="website"
+        title="Memorial CIPASO — Centro de Investigação Parapsicológica de Sorocaba"
+        description="Memorial digital do CIPASO: 240 colunas de parapsicologia publicadas entre 1997 e 2006, artigos e a metodologia do Prof. Valter Franceschini sobre reprogramação mental."
+        path="/"
       />
-      <div className="min-h-screen bg-bg">
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-16 px-4 md:pt-32 md:pb-24 bg-linear-to-b from-primary/5 via-bg to-bg">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <h1 className="text-2xl md:text-5xl font-bold mb-8 text-fg leading-tight">
-              Memorial Digital
+
+      {/* Masthead */}
+      <section className="paper-grain border-b border-rule">
+        <div className="container-editorial py-16 md:py-24">
+          <Reveal immediate>
+            <p className="eyebrow">Memorial digital · Sorocaba, São Paulo</p>
+
+            <h1 className="mt-6 font-display text-[clamp(2.5rem,8.5vw,6.5rem)] leading-[0.95] text-ink">
+              Centro de Investigação
               <br />
-              <span className="text-7xl md:text-9xl text-primary">CIPASO</span>
+              <span className="text-brand-ink">Parapsicológica</span>
+              <br />
+              de Sorocaba
             </h1>
-            <p className="text-lg md:text-xl text-muted-fg max-w-3xl mx-auto leading-relaxed font-light">
-              Centro de Investigação Parapsicológica de Sorocaba — Preservando a história da
-              investigação científica, desenvolvimento humano e o legado do Prof. Valter Franceschini
+
+            <p className="mt-8 max-w-2xl text-lg leading-relaxed text-muted">
+              Um arquivo aberto da pesquisa, do ensino e da produção do CIPASO entre 1989 e 2016, e do trabalho
+              do Prof. Valter Álfredo Franceschini.
             </p>
-          </motion.div>
+          </Reveal>
+
+          <Reveal immediate delay={0.1}>
+            <dl className="mt-12 grid max-w-3xl grid-cols-2 gap-px border border-rule bg-rule sm:grid-cols-4">
+              {[
+                { label: 'Fundação', value: '1989' },
+                { label: 'Encerramento', value: '2016' },
+                { label: 'Itens no acervo', value: String(totalFiles) },
+                { label: 'Artigos', value: String(getAllPosts().length) }
+              ].map(item => (
+                <div key={item.label} className="bg-paper p-4">
+                  <dt className="eyebrow">{item.label}</dt>
+                  <dd className="mt-2 font-display text-2xl tabular text-ink">{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <div className="mt-10 flex flex-wrap gap-4">
+              <ButtonLink to="/acervo">
+                Explorar o acervo
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </ButtonLink>
+              <ButtonLink to="/sobre" variant="outline">
+                Conhecer a história
+              </ButtonLink>
+            </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* Seção de Destaque: Citação + Arquivo + Cards */}
-      <section className="py-20 px-4 bg-bg">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
-          {/* Grid de Destaque: Citação + Arquivo */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="grid md:grid-cols-2 gap-8 mb-16"
-          >
-            <div>
-              <DailyQuote />
-            </div>
-            <div>
-              <FeaturedFile />
-            </div>
-          </motion.div>
+      {/* Destaques do dia */}
+      <section className="container-editorial py-20" aria-labelledby="hoje">
+        <Reveal>
+          <SectionHeading
+            index="01"
+            eyebrow="Seleção diária"
+            title={<span id="hoje">Do acervo, hoje</span>}
+            description="Um documento e uma citação escolhidos por dia — iguais para todos os visitantes, renovados à meia-noite."
+          />
+        </Reveal>
 
-          {/* Cards de Destaque */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="grid md:grid-cols-3 gap-6"
-          >
-            {/* Card Acervo */}
-            <Link
-              to="/acervo"
-              className="group relative bg-white dark:bg-muted border border-muted rounded-xl p-8 hover:border-primary/50 hover:shadow-lg transition-all duration-300"
-            >
-              <BookOpenIcon className="h-12 w-12 text-primary mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-xl font-bold mb-2 text-fg">Acervo Digital</h3>
-              <p className="text-muted-fg mb-6">
-                Explore documentos, imagens, áudios e vídeos históricos
-              </p>
-              <span className="inline-flex items-center gap-2 text-primary font-medium group-hover:gap-3 transition-all">
-                Explorar <ArrowRightIcon className="h-4 w-4" />
-              </span>
-            </Link>
-
-            {/* Card História */}
-            <div className="relative bg-white dark:bg-muted border border-muted rounded-xl p-8 hover:shadow-lg transition-all duration-300">
-              <UsersIcon className="h-12 w-12 text-primary mb-4" />
-              <h3 className="text-xl font-bold mb-2 text-fg">Nossa História</h3>
-              <p className="text-muted-fg mb-6">
-                Fundado em 1989, o CIPASO foi um centro dedicado à pesquisa parapsicológica
-              </p>
-              <span className="inline-flex items-center gap-2 text-primary font-medium">
-                1989 - Legado Preservado
-              </span>
-            </div>
-
-            {/* Card Missão */}
-            <div className="relative bg-white dark:bg-muted border border-muted rounded-xl p-8 hover:shadow-lg transition-all duration-300">
-              <Sparkles className="h-12 w-12 text-primary mb-4" fill="currentColor" />
-              <h3 className="text-xl font-bold mb-2 text-fg">Nossa Missão</h3>
-              <p className="text-muted-fg mb-6">
-                Investigação científica de fenômenos PSI e desenvolvimento humano
-              </p>
-              <span className="inline-flex items-center gap-2 text-primary font-medium">
-                Pesquisa & Humanismo
-              </span>
-            </div>
-          </motion.div>
+        <div className="mt-10 grid gap-6 md:grid-cols-2">
+          <Reveal>
+            <DailyQuote />
+          </Reveal>
+          <Reveal delay={0.08}>
+            <FeaturedFile />
+          </Reveal>
         </div>
       </section>
 
-      {/* Seção Prof. Valter Franceschini */}
       <AboutValter />
 
-      {/* Seção Vídeo em Destaque */}
-      <section className="py-20 px-4 bg-bg">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-fg">
-                Acervo em Vídeo
-              </h2>
-              <p className="text-lg text-muted-fg">
-                Palestras e documentos históricos em formato audiovisual
-              </p>
-            </div>
+      {/* Vídeo */}
+      <section className="container-editorial py-20" aria-labelledby="video">
+        <Reveal>
+          <SectionHeading
+            index="03"
+            eyebrow="Registro audiovisual"
+            title={<span id="video">Acervo em vídeo</span>}
+            description="Palestras e registros históricos digitalizados a partir das fitas originais."
+          />
+        </Reveal>
 
-            <FeaturedVideo />
-          </motion.div>
-        </div>
+        <Reveal className="mt-10">
+          <FeaturedVideo />
+        </Reveal>
       </section>
 
-      {/* Seção Blog - Posts Recentes */}
-      <section className="py-20 px-4 bg-bg">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-fg">
-                Posts Recentes
-              </h2>
-              <p className="text-lg text-muted-fg">
-                Investigação, desenvolvimento humano e pesquisa em parapsicologia
-              </p>
-            </div>
+      {/* Artigos */}
+      {posts.length > 0 && (
+        <section className="container-editorial py-20" aria-labelledby="artigos">
+          <Reveal>
+            <SectionHeading
+              index="04"
+              eyebrow="Textos do professor"
+              title={<span id="artigos">Últimos artigos</span>}
+              description="Colunas e materiais didáticos transcritos do acervo original."
+            />
+          </Reveal>
 
-            {/* Cards de Blog */}
-            <div className="grid md:grid-cols-3 gap-8">
-              {recentPosts.map((post, index) => (
+          <ol className="mt-10 border-t border-rule">
+            {posts.map((post, index) => (
+              <Reveal as="li" key={post.slug} delay={index * 0.05}>
                 <Link
-                  key={post.id}
                   to={`/blog/${post.slug}`}
-                  className="group"
+                  className="group grid gap-3 border-b border-rule py-7 md:grid-cols-[7rem_1fr_auto] md:items-baseline md:gap-8"
                 >
-                  <motion.article
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                    className="bg-white dark:bg-muted border border-muted rounded-xl p-8 hover:shadow-lg hover:border-primary/50 transition-all duration-300 flex flex-col h-full cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2 mb-4">
-                      <DocumentTextIcon className="h-5 w-5 text-primary" />
-                      <span className="text-xs uppercase tracking-wide text-primary font-semibold">
-                        {post.categoria}
-                      </span>
-                    </div>
+                  <span className="eyebrow tabular text-brand-ink">
+                    {String(index + 1).padStart(2, '0')} · {CATEGORY_LABELS[post.categoria]}
+                  </span>
 
-                    <h3 className="text-xl font-bold mb-3 text-fg leading-snug group-hover:text-primary transition-colors">
+                  <span>
+                    <span className="font-display text-2xl leading-tight text-ink transition-colors group-hover:text-brand-ink">
                       {post.titulo}
-                    </h3>
+                    </span>
+                    <span className="mt-2 block text-muted measure">{post.resumo}</span>
+                  </span>
 
-                    <p className="text-muted-fg mb-4 grow">
-                      {post.resumo}
-                    </p>
-
-                    <div className="flex items-center justify-between pt-4 border-t border-muted text-sm text-muted-fg">
-                      <span>
-                        {new Date(post.data).toLocaleDateString('pt-BR', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </span>
-                      <span className="text-primary font-medium group-hover:gap-1 flex items-center gap-0 transition-all">
-                        Ler mais <span className="group-hover:translate-x-1 transition-transform">→</span>
-                      </span>
-                    </div>
-                  </motion.article>
+                  <time dateTime={post.data} className="text-xs text-muted tabular">
+                    {formatDate(post.data, 'short')}
+                  </time>
                 </Link>
-              ))}
-            </div>
+              </Reveal>
+            ))}
+          </ol>
 
-            {/* CTA para Blog Completo */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mt-12"
-            >
-              <Link
-                to="/blog"
-                className="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-secondary transition-all hover:gap-3 group"
-              >
-                Ver Todos os Posts
-                <ArrowRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </motion.div>
-          </motion.div>
+          <div className="mt-10">
+            <ButtonLink to="/blog" variant="outline">
+              Ver todos os artigos
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </ButtonLink>
+          </div>
+        </section>
+      )}
+
+      {/* Legado */}
+      <section className="border-t border-rule bg-sunken" aria-labelledby="legado">
+        <div className="container-editorial py-20">
+          <Reveal>
+            <SectionHeading
+              index="05"
+              eyebrow="Legado"
+              title={<span id="legado">Ciência experimental e humanismo</span>}
+            />
+          </Reveal>
+
+          <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:gap-16">
+            <Reveal className="space-y-5 text-lg leading-relaxed text-muted">
+              <p>
+                O CIPASO estudava, identificava e classificava os fenômenos exteriorizados através da
+                paranormalidade — a capacidade de percepção hiperestésica e de conhecimento extrassensorial.
+              </p>
+              <p>
+                Fundado em 1989, desenvolveu métodos de cura, orientação e aconselhamento apoiados em observação
+                sistemática. Este memorial preserva esse material e o mantém acessível a pesquisadores, alunos e
+                familiares.
+              </p>
+              <figure className="sheet p-6">
+                <figcaption className="eyebrow">A 3ª Lei da Mente</figcaption>
+                <blockquote className="mt-4 font-display text-xl leading-snug text-ink">
+                  “O seu corpo reage de acordo com como age a sua mente.”
+                </blockquote>
+                <p className="mt-4 text-sm text-muted">
+                  Origem das doenças psicossomáticas segundo o método: pensamentos destrutivos atraem aquilo que
+                  prejudica — daí a necessidade de trabalhar a programação mental de forma consciente.
+                </p>
+              </figure>
+            </Reveal>
+
+            <Reveal delay={0.08}>
+              <dl className="divide-y divide-rule border-y border-rule">
+                {values.map(value => (
+                  <div key={value.term} className="grid gap-2 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
+                    <dt className="eyebrow pt-1">{value.term}</dt>
+                    <dd className="text-ink">{value.definition}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Reveal>
+          </div>
         </div>
       </section>
-
-      {/* Seção Institucional */}
-      <section className="py-20 px-4 bg-primary/5">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 text-fg">Legado: Ciência e Humanismo</h2>
-            <div className="space-y-6 text-lg text-muted-fg leading-relaxed">
-              <p>
-                O <strong>CIPASO (Centro de Investigação Parapsicológica de Sorocaba)</strong> foi uma instituição dedicada à <strong>ciência experimental</strong> que estudava, identificava e classificava os fenômenos exteriorizados através da paranormalidade — a capacidade humana de percepção hiperestésica e conhecimento extrasensorial não convencional.
-              </p>
-
-              <p>
-                Fundado em <strong>1989</strong> pelo Prof. Valter Álfredo Franceschini, desenvolveu metodologias para ajudar pessoas a terem uma vida melhor, mais alegre, mais feliz e mais saudável, trabalhando com <strong>cura, orientação e aconselhamento</strong> baseado em princípios científicos rigorosos. Este memorial preserva seu trabalho e permite que seu legado continue inspirando e ajudando pessoas.
-              </p>
-
-              <p>
-                A base fundamental de sua metodologia repousava nas <strong>5 Ferramentas Mentais</strong>, que operam nos níveis cerebrais beta, alfa, teta e delta, promovendo reprogramação mental positiva e programação consciente da mente.
-              </p>
-
-              <div className="bg-white dark:bg-muted border border-primary/30 rounded-lg p-6 my-8">
-                <h3 className="text-xl font-bold mb-4 text-fg">A 3ª Lei da Mente</h3>
-                <p className="text-base italic text-primary font-medium mb-4">
-                  "O seu corpo reage de acordo com como age a sua mente."
-                </p>
-                <p className="text-base text-muted-fg">
-                  Esta é a origem das doenças psicossomáticas. Pensamentos destrutivos e negativos atraem aquilo que não serve e prejudica. Por isso, é imperativo trabalhar conscientemente a programação mental através de exercícios e vivência das Leis da Mente.
-                </p>
-              </div>
-
-              <div className="bg-white dark:bg-muted border border-primary/30 rounded-lg p-8 mt-8">
-                <h3 className="text-2xl font-bold mb-6 text-fg">Valores Fundamentais</h3>
-                <ul className="space-y-3 text-left">
-                  <li className="flex items-start gap-3">
-                    <span className="text-primary mt-1">•</span>
-                    <span>Investigação científica de fenômenos parapsicológicos</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-primary mt-1">•</span>
-                    <span>Reprogramação mental positiva para segurança emocional</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-primary mt-1">•</span>
-                    <span>Fortalecimento de vínculos familiares e comunitários</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-primary mt-1">•</span>
-                    <span>Educação e divulgação científica acessível</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-      </div>
     </>
   )
 }

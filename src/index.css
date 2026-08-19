@@ -1,118 +1,346 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+
+/* Tema por classe: o toggle controla .dark no <html> (v4 usa prefers-color-scheme por padrão) */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @font-face {
   font-family: 'Sutro W01';
   src: url('./assets/fonts/SutroW01-Heavy.ttf') format('truetype');
   font-weight: 900;
+  font-style: normal;
   font-display: swap;
 }
 
-@theme {
-  /* Core Colors - Tailwind v4 */
-  --color-primary: #5CBDBF;
-  --color-secondary: #4A9D9F;
-  --color-accent: #7AD4D6;
+/* --------------------------------------------------------------------------
+   Paleta: papel de arquivo + tinta + o turquesa institucional do CIPASO.
+   Contrastes verificados (WCAG 2.2 AA):
+   ink/paper 16.2 · muted/paper 6.1 · brand-ink/paper 5.8 · branco/brand-ink 6.4
+   -------------------------------------------------------------------------- */
+:root {
+  --paper: #f7f4ef;
+  --paper-raised: #fffdfa;
+  --paper-sunken: #efe9e0;
+  --ink: #16181a;
+  --ink-muted: #585d61;
+  --ink-faint: #656a6e;
+  --rule: #ded7cb;
+  --rule-strong: #c9c0b1;
 
-  /* Semantic Colors - Light Mode */
-  --color-bg: #FFFFFF;
-  --color-fg: #000000;
-  --color-muted: #F5F5F5;
-  --color-muted-fg: #666666;
-  --color-border: #E5E5E5;
+  --brand: #5cbdbf;
+  --brand-ink: #0e6a6d;
+  --brand-ink-hover: #0b5457;
+  --brand-wash: #e4f1f1;
+  --on-brand: #16181a;
+  --on-brand-ink: #ffffff;
 
-  /* Semantic Colors - Dark Mode */
-  --color-bg-dark: #0A0A0A;
-  --color-fg-dark: #F0F0F0;
-  --color-muted-dark: #1A1A1A;
-  --color-muted-fg-dark: #A0A0A0;
-  --color-border-dark: #2A2A2A;
+  --mark: #8a5026;
+  --mark-wash: #f6ece2;
 
-  /* Typography */
-  --font-display: 'Sutro W01', system-ui, serif;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --shadow-card: 0 1px 0 var(--rule);
+  --shadow-raised: 0 10px 30px -18px rgb(22 24 26 / 0.45);
 
-  /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
+  color-scheme: light;
+}
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+.dark {
+  --paper: #101315;
+  --paper-raised: #181c1e;
+  --paper-sunken: #0a0c0d;
+  --ink: #ece7de;
+  --ink-muted: #a8aeb0;
+  --ink-faint: #8f9699;
+  --rule: #262b2e;
+  --rule-strong: #394044;
 
-  /* Radius */
-  --radius: 0.5rem;
+  --brand: #5cbdbf;
+  --brand-ink: #7fd3d5;
+  --brand-ink-hover: #a6e2e3;
+  --brand-wash: #14282a;
+  --on-brand: #06181a;
+  --on-brand-ink: #06181a;
+
+  --mark: #d79a63;
+  --mark-wash: #241a12;
+
+  --shadow-card: 0 1px 0 var(--rule);
+  --shadow-raised: 0 10px 30px -18px rgb(0 0 0 / 0.8);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-raised: var(--paper-raised);
+  --color-sunken: var(--paper-sunken);
+  --color-ink: var(--ink);
+  --color-muted: var(--ink-muted);
+  --color-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-wash: var(--brand-wash);
+  --color-mark: var(--mark);
+  --color-mark-wash: var(--mark-wash);
+  --color-on-brand: var(--on-brand);
+  --color-on-brand-ink: var(--on-brand-ink);
+
+  --font-display: 'Sutro W01', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-sheet: 3px;
+
+  --ease-out-editorial: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @layer base {
-  * {
-    @apply m-0 p-0 box-border;
-  }
-
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5.5rem;
   }
 
   body {
-    @apply font-sans bg-bg text-fg leading-relaxed antialiased;
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-feature-settings: 'kern' 1, 'liga' 1, 'cv05' 1;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-black leading-tight -tracking-wider;
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
   }
 
-  h1 {
-    @apply text-5xl md:text-7xl;
+  p {
+    text-wrap: pretty;
   }
 
-  h2 {
-    @apply text-4xl md:text-5xl;
+  :focus-visible {
+    outline: 2px solid var(--brand-ink);
+    outline-offset: 3px;
+    border-radius: 2px;
   }
 
-  h3 {
-    @apply text-2xl md:text-3xl;
+  ::selection {
+    background: var(--brand);
+    color: var(--on-brand);
   }
 
-  /* Dark Mode Support */
-  @supports (color: var(--color-bg-dark)) {
-    html.dark {
-      --color-bg: var(--color-bg-dark);
-      --color-fg: var(--color-fg-dark);
-      --color-muted: var(--color-muted-dark);
-      --color-muted-fg: var(--color-muted-fg-dark);
-      --color-border: var(--color-border-dark);
+  hr {
+    border: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Números alinhados em tabelas, datas e contadores do acervo */
+  time,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--paper-sunken);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--rule-strong);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-ink);
+  }
+}
+
+@layer components {
+  /* Rótulo tipográfico de seção — versaletes com filete, linguagem de ficha catalográfica */
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  /* Folha: superfície de papel com filete, sem sombra difusa nem canto arredondado */
+  .sheet {
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sheet);
+  }
+
+  .sheet-interactive {
+    transition:
+      border-color 200ms var(--ease-out-editorial),
+      transform 200ms var(--ease-out-editorial),
+      box-shadow 200ms var(--ease-out-editorial);
+  }
+
+  .sheet-interactive:hover {
+    border-color: var(--brand-ink);
+    box-shadow: var(--shadow-raised);
+  }
+
+  /* Filete duplo de cabeçalho, referência à diagramação de jornal impresso */
+  .rule-double {
+    border-top: 3px double var(--rule-strong);
+  }
+
+  .link-ink {
+    color: var(--brand-ink);
+    text-underline-offset: 0.25em;
+    text-decoration-thickness: 1px;
+  }
+
+  .link-ink:hover {
+    color: var(--brand-ink-hover);
+    text-decoration-line: underline;
+  }
+
+  /* Textura sutil de papel: só no modo claro, atrás de blocos editoriais */
+  .paper-grain {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .paper-grain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image: radial-gradient(var(--rule) 0.5px, transparent 0.5px);
+    background-size: 14px 14px;
+    mask-image: linear-gradient(to bottom, black, transparent 70%);
+  }
+
+  .dark .paper-grain::before {
+    opacity: 0.25;
+  }
+
+  /* Corpo de artigo do blog */
+  .article-body {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    color: var(--ink);
+  }
+
+  .article-body > * + * {
+    margin-top: 1.25rem;
+  }
+
+  .article-body h2 {
+    font-size: 1.75rem;
+    margin-top: 2.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .article-body h3 {
+    font-size: 1.3125rem;
+    margin-top: 2rem;
+  }
+
+  .article-body ul,
+  .article-body ol {
+    padding-left: 1.25rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .article-body ul {
+    list-style: square;
+  }
+
+  .article-body ol {
+    list-style: decimal;
+  }
+
+  .article-body li::marker {
+    color: var(--brand-ink);
+  }
+
+  .article-body blockquote {
+    border-left: 3px solid var(--brand);
+    padding: 0.25rem 0 0.25rem 1.25rem;
+    font-style: italic;
+    color: var(--ink-muted);
+  }
+
+  .article-body strong {
+    color: var(--ink);
+    font-weight: 650;
+  }
+
+  .article-body a {
+    color: var(--brand-ink);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  /* Primeira letra capitular: marca editorial do artigo */
+  .article-body > p:first-of-type::first-letter {
+    font-family: var(--font-display);
+    font-size: 3.25rem;
+    line-height: 0.8;
+    float: left;
+    padding: 0.25rem 0.6rem 0 0;
+    color: var(--brand-ink);
+  }
+}
+
+@layer utilities {
+  .container-editorial {
+    width: 100%;
+    max-width: 78rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .container-editorial {
+      padding-inline: 2rem;
     }
   }
+
+  .measure {
+    max-width: 68ch;
+  }
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 12px;
-}
+/* Preferência de sistema: sem animação, sem parallax, sem scroll suave */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 
-::-webkit-scrollbar-track {
-  background: var(--color-bg);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: var(--radius);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-secondary);
-}
-
-/* Smooth Transitions */
-@layer components {
-  @apply *:transition-colors *:duration-200 *:ease-in-out;
-}
-
-/* Framer Motion Optimization */
-[data-framer-motion] * {
-  @apply transition-none!;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

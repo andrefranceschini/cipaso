@@ -1,409 +1,294 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { DocumentTextIcon, PhotoIcon, MusicalNoteIcon, FilmIcon, NewspaperIcon, BookOpenIcon } from '@heroicons/react/24/solid'
-import { MagnifyingGlassIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid'
-import { getAllFiles, type FileCategory } from '@/data/files'
-import { Modal } from '@/components/common/Modal'
-import { PdfViewer } from '@/components/common/PdfViewer'
+import { useMemo, useState } from 'react'
+import { FileText, Film, Image as ImageIcon, Music, Search, X } from 'lucide-react'
 import { SEO } from '@/components/SEO'
+import { Modal } from '@/components/common/Modal'
+import { FileViewer } from '@/components/common/FileViewer'
+import { Reveal } from '@/components/motion/Reveal'
+import { Button } from '@/components/ui/Button'
+import { CATEGORY_LABELS, getAllFiles, getSeries, type DigitalFile, type FileType } from '@/data/files'
+import { cn, formatDate, formatFileSize } from '@/lib/utils'
 
-const categoryLabels: Record<string, string> = {
-  textos: 'Documentos',
-  imagens: 'Imagens Históricas',
-  audios: 'Áudios',
-  videos: 'Vídeos',
-  jornais: 'Jornais',
-  livros: 'Publicações'
+type SortOption = 'recentes' | 'antigos' | 'az' | 'za'
+
+const sortLabels: Record<SortOption, string> = {
+  recentes: 'Publicação mais recente',
+  antigos: 'Publicação mais antiga',
+  az: 'Título (A → Z)',
+  za: 'Título (Z → A)'
 }
 
-const categoryIcons: Record<string, React.ReactNode> = {
-  textos: <DocumentTextIcon className="h-6 w-6" />,
-  imagens: <PhotoIcon className="h-6 w-6" />,
-  audios: <MusicalNoteIcon className="h-6 w-6" />,
-  videos: <FilmIcon className="h-6 w-6" />,
-  jornais: <NewspaperIcon className="h-6 w-6" />,
-  livros: <BookOpenIcon className="h-6 w-6" />
+const typeIcons: Record<FileType, typeof FileText> = {
+  pdf: FileText,
+  imagem: ImageIcon,
+  audio: Music,
+  video: Film
 }
 
-type SortOption = 'recent' | 'older' | 'az' | 'za'
+const PAGE_SIZE = 24
 
 export function Acervo() {
   const allFiles = getAllFiles()
-  const [selectedCategory, setSelectedCategory] = useState<FileCategory | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState<SortOption>('recent')
-  const [selectedFile, setSelectedFile] = useState<any>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isPdfFullscreen, setIsPdfFullscreen] = useState(false)
+  const series = getSeries()
 
-  const handleCloseModal = () => {
-    setIsPdfFullscreen(false)
-    setIsModalOpen(false)
-  }
+  const [query, setQuery] = useState('')
+  const [serie, setSerie] = useState<string | null>(null)
+  const [sort, setSort] = useState<SortOption>('recentes')
+  const [visible, setVisible] = useState(PAGE_SIZE)
+  const [selected, setSelected] = useState<DigitalFile | null>(null)
 
-  const categories = Array.from(new Set(allFiles.map(f => f.categoria))) as FileCategory[]
+  const results = useMemo(() => {
+    const normalized = query.trim().toLowerCase()
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    const filtered = allFiles.filter(file => {
+      if (serie && file.serie !== serie) return false
+      if (!normalized) return true
+
+      return (
+        file.titulo.toLowerCase().includes(normalized) ||
+        file.descricao.toLowerCase().includes(normalized) ||
+        file.arquivo.toLowerCase().includes(normalized)
+      )
     })
-  }
 
-  // Filtrar por categoria
-  let filtered = selectedCategory
-    ? allFiles.filter(f => f.categoria === selectedCategory)
-    : allFiles
+    const sorted = [...filtered]
 
-  // Filtrar por busca
-  if (searchQuery) {
-    const query = searchQuery.toLowerCase()
-    filtered = filtered.filter(f =>
-      f.titulo.toLowerCase().includes(query) ||
-      f.descricao.toLowerCase().includes(query)
-    )
-  }
-
-  // Ordenar
-  const sorted = [...filtered].sort((a, b) => {
-    switch (sortBy) {
-      case 'recent':
-        return new Date(b.data).getTime() - new Date(a.data).getTime()
-      case 'older':
-        return new Date(a.data).getTime() - new Date(b.data).getTime()
-      case 'az':
-        return a.titulo.localeCompare(b.titulo)
-      case 'za':
-        return b.titulo.localeCompare(a.titulo)
-      default:
-        return 0
+    // Itens sem data catalogada ficam sempre no fim das ordenações cronológicas.
+    const byDate = (a: DigitalFile, b: DigitalFile, direction: 1 | -1) => {
+      if (!a.data && !b.data) return 0
+      if (!a.data) return 1
+      if (!b.data) return -1
+      return direction * b.data.localeCompare(a.data)
     }
-  })
 
-  const openModal = (file: any) => {
-    setSelectedFile(file)
-    setIsModalOpen(true)
-  }
+    switch (sort) {
+      case 'antigos':
+        sorted.sort((a, b) => byDate(a, b, -1))
+        break
+      case 'az':
+        sorted.sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR', { numeric: true }))
+        break
+      case 'za':
+        sorted.sort((a, b) => b.titulo.localeCompare(a.titulo, 'pt-BR', { numeric: true }))
+        break
+      default:
+        sorted.sort((a, b) => byDate(a, b, 1))
+        break
+    }
+
+    return sorted
+  }, [allFiles, query, serie, sort])
+
+  const shown = results.slice(0, visible)
+
+  const resetPagination = () => setVisible(PAGE_SIZE)
 
   return (
     <>
       <SEO
-        title="Acervo Digital - Memorial CIPASO"
-        description="Explore publicações, documentos, vídeos e imagens históricas do CIPASO. Mais de 240 arquivos digitalizados sobre parapsicologia científica."
-        canonical="https://cipaso.com/acervo"
-        ogImage="https://cipaso.com/favicon.svg"
-        ogType="website"
+        title="Acervo digital"
+        description={`Consulte ${allFiles.length} itens do acervo do CIPASO: colunas de parapsicologia publicadas no Diário de Sorocaba e no Jornal Ipanema entre 1997 e 2006, além de registros em vídeo.`}
+        path="/acervo"
       />
-      <div className="min-h-screen bg-bg py-20">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
-        {/* Título */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 text-fg">
-            Acervo Digital
-          </h1>
-          <p className="text-xl text-muted-fg">
-            Explore documentos, imagens, áudios, vídeos e publicações históricas do CIPASO
-          </p>
-        </motion.div>
 
-        {/* Barra de Busca */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.05 }}
-          className="mb-8"
-        >
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-fg" />
-            <input
-              type="text"
-              placeholder="Buscar arquivos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-muted border border-muted rounded-lg text-fg placeholder-muted-fg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            />
+      <section className="border-b border-rule paper-grain">
+        <div className="container-editorial py-14">
+          <Reveal immediate>
+            <p className="eyebrow">Catálogo</p>
+            <h1 className="mt-5 font-display text-[clamp(2.5rem,7vw,3.75rem)] leading-none text-ink">Acervo digital</h1>
+            <p className="mt-6 max-w-2xl text-lg text-muted">
+              {allFiles.length} itens digitalizados a partir dos originais. Títulos, datas e veículos foram lidos
+              do próprio documento; a revisão manual da catalogação segue em andamento.
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      <div className="container-editorial py-10">
+        {/* Filtros */}
+        <div className="grid gap-5 border-b border-rule pb-6 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <label htmlFor="busca-acervo" className="eyebrow block">
+              Buscar no acervo
+            </label>
+            <div className="relative mt-3">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-faint"
+                aria-hidden="true"
+              />
+              <input
+                id="busca-acervo"
+                type="search"
+                value={query}
+                onChange={event => {
+                  setQuery(event.target.value)
+                  resetPagination()
+                }}
+                placeholder="Título, descrição ou nome do arquivo"
+                className="w-full border border-rule bg-raised py-2.5 pl-9 pr-9 text-ink placeholder:text-faint focus:border-brand-ink focus:outline-none"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery('')
+                    resetPagination()
+                  }}
+                  aria-label="Limpar busca"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-muted hover:text-ink"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           </div>
-        </motion.div>
 
-        {/* Filtros e Ordenação */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
-        >
-          {/* Filtros de Categoria */}
-          <div className="flex flex-wrap gap-2 overflow-x-auto pb-2">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
-                selectedCategory === null
-                  ? 'bg-primary text-white'
-                  : 'bg-muted text-fg hover:border-primary border border-muted'
-              }`}
+          <div>
+            <label htmlFor="ordem-acervo" className="eyebrow block">
+              Ordenar por
+            </label>
+            <select
+              id="ordem-acervo"
+              value={sort}
+              onChange={event => setSort(event.target.value as SortOption)}
+              className="mt-3 w-full border border-rule bg-raised px-3 py-2.5 text-ink focus:border-brand-ink focus:outline-none md:w-56"
             >
-              Todos ({allFiles.length})
+              {Object.entries(sortLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <fieldset className="mt-6">
+          <legend className="eyebrow">Origem</legend>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setSerie(null)
+                resetPagination()
+              }}
+              aria-pressed={serie === null}
+              className={cn(
+                'border px-3 py-1.5 text-sm transition-colors',
+                serie === null
+                  ? 'border-brand-ink bg-brand-ink text-on-brand-ink'
+                  : 'border-rule text-muted hover:border-brand-ink hover:text-ink'
+              )}
+            >
+              Tudo ({allFiles.length})
             </button>
 
-            {categories.map(category => {
-              const count = allFiles.filter(f => f.categoria === category).length
+            {series.map(name => {
+              const total = allFiles.filter(file => file.serie === name).length
+              const isActive = serie === name
+
               return (
                 <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-all whitespace-nowrap flex items-center gap-1 ${
-                    selectedCategory === category
-                      ? 'bg-primary text-white'
-                      : 'bg-muted text-fg hover:border-primary border border-muted'
-                  }`}
+                  key={name}
+                  type="button"
+                  onClick={() => {
+                    setSerie(isActive ? null : name)
+                    resetPagination()
+                  }}
+                  aria-pressed={isActive}
+                  className={cn(
+                    'border px-3 py-1.5 text-sm transition-colors',
+                    isActive
+                      ? 'border-brand-ink bg-brand-ink text-on-brand-ink'
+                      : 'border-rule text-muted hover:border-brand-ink hover:text-ink'
+                  )}
                 >
-                  {categoryIcons[category]}
-                  {categoryLabels[category]} ({count})
+                  {name} ({total})
                 </button>
               )
             })}
           </div>
+        </fieldset>
 
-          {/* Ordenação */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="px-4 py-2 bg-muted border border-muted rounded-lg text-fg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
-          >
-            <option value="recent">Mais Recentes</option>
-            <option value="older">Mais Antigos</option>
-            <option value="az">A → Z</option>
-            <option value="za">Z → A</option>
-          </select>
-        </motion.div>
+        <p aria-live="polite" className="mt-6 text-sm text-muted tabular">
+          {results.length === 0
+            ? 'Nenhum item encontrado.'
+            : `${results.length} ${results.length === 1 ? 'item' : 'itens'} · exibindo ${shown.length}`}
+        </p>
 
-        {/* Grid de Arquivos */}
-        {sorted.length > 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[80vh] overflow-y-auto pr-2"
-          >
-            {sorted.map((file, index) => (
-              <motion.div
-                key={file.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.05 }}
-                className="group bg-white dark:bg-muted border border-muted rounded-xl overflow-hidden hover:shadow-lg hover:border-primary/50 transition-all duration-300 flex flex-col"
-              >
-                {/* Ícone Categoria */}
-                <div className="h-32 bg-linear-to-br from-primary/20 to-accent/10 flex items-center justify-center group-hover:from-primary/30 group-hover:to-accent/20 transition-all">
-                  <div className="text-primary/40 group-hover:text-primary/60 transition-colors">
-                    <div className="h-16 w-16 flex items-center justify-center">
-                      {categoryIcons[file.categoria]}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Conteúdo */}
-                <div className="p-6 flex flex-col flex-grow">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs uppercase tracking-wide text-primary font-semibold bg-primary/10 px-2 py-1 rounded">
-                      {categoryLabels[file.categoria]}
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg font-bold text-fg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                    {file.titulo}
-                  </h3>
-
-                  <p className="text-sm text-muted-fg mb-4 flex-grow line-clamp-2">
-                    {file.descricao}
-                  </p>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-muted text-xs text-muted-fg mb-4">
-                    <span>{formatDate(file.data)}</span>
-                    <span className="font-medium">{file.tipo.toUpperCase()}</span>
-                  </div>
-
-                  <button
-                    onClick={() => openModal(file)}
-                    className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-secondary transition-all"
-                  >
-                    Visualizar
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <p className="text-xl text-muted-fg">
-              Nenhum arquivo encontrado.
-            </p>
-          </motion.div>
-        )}
-      </div>
-
-      {/* PDF Fullscreen */}
-      {isPdfFullscreen && selectedFile?.path.endsWith('.pdf') && (
-        <PdfViewer
-          path={selectedFile.path}
-          title={selectedFile.titulo}
-          isFullscreen={true}
-          onClose={() => setIsPdfFullscreen(false)}
-        />
-      )}
-
-      {/* Modal */}
-      <Modal
-        isOpen={isModalOpen && !isPdfFullscreen}
-        onClose={handleCloseModal}
-        title={selectedFile?.titulo}
-      >
-        {selectedFile && (
+        {/* Índice do acervo */}
+        {results.length > 0 ? (
           <>
-            {selectedFile.categoria === 'imagens' ? (
-              <div className="flex flex-col items-center gap-6">
-                <img
-                  src={selectedFile.path}
-                  alt={selectedFile.titulo}
-                  className="max-w-full max-h-[60vh] rounded-lg shadow-lg"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div className="w-full">
-                  <p className="text-muted-fg text-sm mb-4">{selectedFile.descricao}</p>
-                  <a
-                    href={selectedFile.path}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block w-full text-center bg-primary text-white py-3 rounded-lg font-medium hover:bg-secondary transition-all"
-                  >
-                    Abrir em Nova Aba
-                  </a>
-                </div>
-              </div>
-            ) : selectedFile.categoria === 'videos' ? (
-              <div className="w-full flex flex-col lg:flex-row gap-6">
-                {/* Vídeo */}
-                <div className="w-full lg:flex-1">
-                  <div className="w-full aspect-video max-h-80">
-                    <video
-                      src={selectedFile.path}
-                      controls
-                      autoPlay
-                      className="w-full h-full rounded-lg"
-                    />
-                  </div>
-                </div>
+            <ol className="mt-4 border-t border-rule">
+              {shown.map((file, index) => {
+                const Icon = typeIcons[file.tipo]
 
-                {/* Info e Botões */}
-                <div className="w-full lg:w-64 flex flex-col gap-4">
-                  <div>
-                    <h4 className="text-xs uppercase tracking-wide text-primary font-semibold mb-2">
-                      {categoryLabels[selectedFile.categoria]}
-                    </h4>
-                    <h3 className="text-lg font-bold text-fg mb-2">
-                      {selectedFile.titulo}
-                    </h3>
-                    <p className="text-sm text-muted-fg mb-4">
-                      {selectedFile.descricao}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col gap-3">
-                    <a
-                      href={selectedFile.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full text-center bg-primary text-white py-3 rounded-lg font-medium hover:bg-secondary transition-all"
-                    >
-                      Abrir em Tela Cheia
-                    </a>
-                    <a
-                      href={selectedFile.path}
-                      download
-                      className="w-full text-center bg-primary/20 text-primary py-3 rounded-lg font-medium hover:bg-primary/30 transition-all"
-                    >
-                      Baixar Vídeo
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ) : selectedFile.path.endsWith('.pdf') ? (
-              <div className="space-y-4">
-                <PdfViewer
-                  path={selectedFile.path}
-                  title={selectedFile.titulo}
-                  isFullscreen={false}
-                  onClose={() => {}}
-                />
-                <div className="space-y-3 text-sm">
-                  <p className="text-muted-fg">{selectedFile.descricao}</p>
-                  <div className="grid grid-cols-2 gap-3 text-muted-fg">
-                    <div>
-                      <span className="font-medium text-fg">Data:</span>
-                      <p>{formatDate(selectedFile.data)}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-fg">Tipo:</span>
-                      <p>{selectedFile.tipo.toUpperCase()}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
+                return (
+                  <li key={file.id} className="border-b border-rule">
                     <button
-                      onClick={() => setIsPdfFullscreen(true)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-primary text-white py-3 rounded-lg font-medium hover:bg-secondary transition-all"
+                      type="button"
+                      onClick={() => setSelected(file)}
+                      className="group grid w-full grid-cols-[3rem_1fr] items-baseline gap-x-4 gap-y-1.5 py-4 text-left transition-colors hover:bg-brand-wash/60 md:grid-cols-[3rem_1fr_8rem_11rem_4.5rem]"
                     >
-                      <ArrowTopRightOnSquareIcon className="h-5 w-5" />
-                      Tela Cheia
+                      <span className="eyebrow tabular text-faint">{String(index + 1).padStart(3, '0')}</span>
+
+                      <span className="flex items-baseline gap-2 min-w-0">
+                        <Icon className="h-4 w-4 shrink-0 translate-y-0.5 text-brand-ink" aria-hidden="true" />
+                        <span className="truncate text-ink group-hover:text-brand-ink">{file.titulo}</span>
+                      </span>
+
+                      <span className="col-start-2 text-xs text-muted tabular md:col-start-3">
+                        {file.data ? (
+                          <time dateTime={file.data}>{formatDate(file.data, 'short')}</time>
+                        ) : (
+                          <span className="text-faint">sem data</span>
+                        )}
+                      </span>
+
+                      <span className="col-start-2 truncate text-xs text-muted md:col-start-4">{file.serie}</span>
+
+                      <span className="col-start-2 text-xs text-muted tabular md:col-start-5 md:text-right">
+                        {formatFileSize(file.tamanho)}
+                      </span>
                     </button>
-                    <a
-                      href={selectedFile.path}
-                      download
-                      className="flex-1 text-center bg-primary/20 text-primary py-3 rounded-lg font-medium hover:bg-primary/30 transition-all"
-                    >
-                      Baixar
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <p className="text-muted-fg">{selectedFile.descricao}</p>
-                <div className="grid grid-cols-2 gap-3 text-sm text-muted-fg">
-                  <div>
-                    <span className="font-medium text-fg">Data:</span>
-                    <p>{formatDate(selectedFile.data)}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-fg">Tipo:</span>
-                    <p>{selectedFile.tipo.toUpperCase()}</p>
-                  </div>
-                </div>
-                <a
-                  href={selectedFile.path}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full text-center bg-primary text-white py-3 rounded-lg font-medium hover:bg-secondary transition-all"
-                >
-                  Abrir Arquivo
-                </a>
+                  </li>
+                )
+              })}
+            </ol>
+
+            {visible < results.length && (
+              <div className="mt-8 flex justify-center">
+                <Button variant="outline" onClick={() => setVisible(current => current + PAGE_SIZE)}>
+                  Carregar mais ({results.length - visible} restantes)
+                </Button>
               </div>
             )}
           </>
+        ) : (
+          <div className="mt-10 border border-rule bg-raised p-10 text-center">
+            <p className="text-muted">Nada corresponde a essa busca no acervo.</p>
+            <div className="mt-5">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setQuery('')
+                  setSerie(null)
+                  resetPagination()
+                }}
+              >
+                Limpar filtros
+              </Button>
+            </div>
+          </div>
         )}
-      </Modal>
       </div>
+
+      <Modal
+        isOpen={selected !== null}
+        onClose={() => setSelected(null)}
+        title={selected?.titulo ?? ''}
+        description={selected ? `${CATEGORY_LABELS[selected.categoria]} · ${selected.serie}` : undefined}
+      >
+        {selected && <FileViewer file={selected} />}
+      </Modal>
     </>
   )
 }
