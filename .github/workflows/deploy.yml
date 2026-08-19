@@ -1,78 +1,98 @@
-name: Deploy cipaso.com (build + SSH)
+name: Deploy cipaso.com
+
+# O site é um SPA compilado com Vite: o deploy nativo por Git da Hostinger apenas
+# copia o repositório e não roda o build. Por isso o build acontece aqui e só o
+# conteúdo de dist/ é publicado, por FTP.
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sincronizar_acervo:
+        description: 'Enviar também public/uploads (use ao adicionar arquivos ao acervo)'
+        type: boolean
+        default: false
+
+# Um deploy por vez: evita dois envios disputando os mesmos arquivos.
+concurrency:
+  group: deploy-producao
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  deploy:
+    name: Build e publicação
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Configurar Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: '20'
+          cache: npm
 
-      - name: Install dependencies
+      - name: Instalar dependências
         run: npm ci
+
+      - name: Lint
+        run: npm run lint
 
       - name: Build
         run: npm run build
 
-      # Ajuste aqui se o seu build gerar outra pasta:
-      # Vite: dist
-      # CRA: build
-      - name: Pack build artifacts
+      - name: Verificar artefatos
         run: |
-          if [ -d dist ]; then
-            tar -czf site.tgz -C dist .
-          elif [ -d build ]; then
-            tar -czf site.tgz -C build .
-          else
-            echo "Nenhuma pasta dist/ ou build/ encontrada. Ajuste o workflow."
-            exit 1
-          fi
+          set -euo pipefail
+          test -f dist/index.html || { echo "dist/index.html não gerado"; exit 1; }
+          test -f dist/.htaccess || { echo ".htaccess ausente no build (rotas do SPA quebrariam)"; exit 1; }
+          echo "Tamanho do site (sem uploads): $(du -sh --exclude=uploads dist | cut -f1)"
 
-      - name: Upload build to server (SCP)
-        uses: appleboy/scp-action@v0.1.7
+      # O acervo (67 MB) já está no servidor e é enviado só sob demanda,
+      # para o deploy do dia a dia transferir apenas ~1 MB.
+      - name: Publicar site
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
+          server: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_PORT }}
-          source: "site.tgz"
-          target: "~/deploy/cipaso/incoming"
+          password: ${{ secrets.HOSTINGER_PASS }}
+          port: ${{ secrets.HOSTINGER_FTP_PORT || 21 }}
+          protocol: ${{ vars.HOSTINGER_FTP_PROTOCOL || 'ftps' }}
+          local-dir: ./dist/
+          server-dir: ${{ vars.HOSTINGER_FTP_PATH || 'public_html/' }}
+          state-name: .deploy-site-state.json
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            uploads/**
 
-      - name: Activate release (SSH + rsync, keep uploads)
-        uses: appleboy/ssh-action@v1.2.0
+      - name: Publicar acervo (uploads)
+        if: github.event_name == 'workflow_dispatch' && inputs.sincronizar_acervo
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
+          server: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_PORT }}
-          script: |
-            set -e
+          password: ${{ secrets.HOSTINGER_PASS }}
+          port: ${{ secrets.HOSTINGER_FTP_PORT || 21 }}
+          protocol: ${{ vars.HOSTINGER_FTP_PROTOCOL || 'ftps' }}
+          local-dir: ./dist/uploads/
+          server-dir: ${{ vars.HOSTINGER_FTP_PATH || 'public_html/' }}uploads/
+          state-name: .deploy-uploads-state.json
+          dangerous-clean-slate: false
 
-            DEPLOY_DIR="$HOME/domains/cipaso.com/public_html"
-            INCOMING_DIR="$HOME/deploy/cipaso/incoming"
-            RELEASES_DIR="$HOME/deploy/cipaso/releases"
-            TS="$(date +%Y%m%d-%H%M%S)"
-            NEW_RELEASE="$RELEASES_DIR/$TS"
-
-            mkdir -p "$NEW_RELEASE"
-            tar -xzf "$INCOMING_DIR/site.tgz" -C "$NEW_RELEASE"
-            rm -f "$INCOMING_DIR/site.tgz"
-
-            # Sincroniza a release para o site, MAS preserva uploads/
-            rsync -av --delete \
-              --exclude 'uploads/' \
-              "$NEW_RELEASE/" \
-              "$DEPLOY_DIR/"
-
-            # (opcional) manter só as últimas 5 releases
-            ls -1dt "$RELEASES_DIR"/* | tail -n +6 | xargs -r rm -rf
+      - name: Verificar site no ar
+        run: |
+          set -euo pipefail
+          for tentativa in 1 2 3; do
+            status=$(curl -fsS -o /dev/null -w '%{http_code}' https://cipaso.com/ || echo '000')
+            echo "Tentativa $tentativa: HTTP $status"
+            [ "$status" = '200' ] && exit 0
+            sleep 15
+          done
+          echo 'O site não respondeu 200 após o deploy.'
+          exit 1
