@@ -1,39 +1,80 @@
+# Memorial CIPASO — configuração Apache (Hostinger)
+# Este arquivo é copiado para dist/ no build e enviado no deploy.
+
+# ----------------------------------------------------------------------
+# Canonicalização: HTTPS e domínio sem www
+# ----------------------------------------------------------------------
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteBase /
 
-  # Não reescrever arquivos e pastas reais
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-  # Não reescrever /uploads/
-  RewriteCond %{REQUEST_URI} ^/uploads/ [NC]
-  RewriteRule ^ - [L]
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 
-  # Reescrever tudo mais para index.html (SPA routing)
-  RewriteRule ^ /index.html [QSA,L]
+  # SPA: qualquer rota que não exista em disco cai no index.html.
+  # Sem isso, abrir /acervo ou /blog/slug direto no navegador retorna 404.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
 </IfModule>
 
-# Configuração de cache para PDFs
-<FilesMatch "\.pdf$">
-  Header set Cache-Control "public, max-age=604800"
-  Header set Content-Type "application/pdf"
-</FilesMatch>
-
-# Habilitar compressão
+# ----------------------------------------------------------------------
+# Compressão
+# ----------------------------------------------------------------------
 <IfModule mod_deflate.c>
-  AddType application/x-protobuffer .pb
-  AddOutputFilterByType DEFLATE text/plain
-  AddOutputFilterByType DEFLATE text/html
-  AddOutputFilterByType DEFLATE text/xml
-  AddOutputFilterByType DEFLATE text/css
-  AddOutputFilterByType DEFLATE text/javascript
-  AddOutputFilterByType DEFLATE application/xml
-  AddOutputFilterByType DEFLATE application/xhtml+xml
-  AddOutputFilterByType DEFLATE application/rss+xml
-  AddOutputFilterByType DEFLATE application/javascript
-  AddOutputFilterByType DEFLATE application/x-javascript
-  AddOutputFilterByType DEFLATE application/x-protobuffer
-  AddOutputFilterByType DEFLATE application/pdf
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/xml application/rss+xml
+  AddOutputFilterByType DEFLATE image/svg+xml application/manifest+json
 </IfModule>
+
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/xml
+  AddOutputFilterByType BROTLI_COMPRESS application/javascript application/json
+  AddOutputFilterByType BROTLI_COMPRESS image/svg+xml
+</IfModule>
+
+# ----------------------------------------------------------------------
+# Cache
+# Assets com hash no nome: imutáveis. HTML e service worker: sempre revalidados.
+# ----------------------------------------------------------------------
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|woff2?|ttf|otf|eot)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  <FilesMatch "\.(jpg|jpeg|png|gif|webp|avif|svg|ico|mp4|webm|mp3|pdf)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+
+  <FilesMatch "\.(html|webmanifest|xml|json)$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+
+  <FilesMatch "(sw\.js|workbox-.*\.js|registerSW\.js)$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+
+  # Segurança
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# ----------------------------------------------------------------------
+# MIME types
+# ----------------------------------------------------------------------
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType image/svg+xml .svg
+  AddType font/woff2 .woff2
+  AddType video/mp4 .mp4
+</IfModule>
+
+# Página de erro do Apache para requisições que não passam pelo SPA
+ErrorDocument 404 /index.html

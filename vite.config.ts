@@ -10,64 +10,49 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'robots.txt'],
       manifest: {
-        name: 'Memorial CIPASO - Centro de Investigação Parapsicológica',
+        name: 'Memorial CIPASO — Centro de Investigação Parapsicológica de Sorocaba',
         short_name: 'Memorial CIPASO',
         description: 'Acervo histórico e memorial digital do CIPASO',
-        theme_color: '#E9A356',
-        background_color: '#FBE4CB',
+        lang: 'pt-BR',
+        start_url: '/',
+        scope: '/',
         display: 'standalone',
-        orientation: 'portrait-primary',
+        theme_color: '#5cbdbf',
+        background_color: '#f7f4ef',
         icons: [
-          {
-            src: '/pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: '/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
+          { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: {
-        navigateFallbackDenylist: [/^\/uploads\//],
+        // Precache apenas o shell da aplicação. O acervo (240 PDFs, vídeo de 40 MB)
+        // fica em runtime caching sob demanda.
+        globPatterns: ['**/*.{js,css,html,woff2,ttf}', 'favicon.svg', 'pwa-*.png'],
+        globIgnores: ['**/uploads/**', '**/og-image.png'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/uploads\//, /\.(?:pdf|mp4|mp3|xml|txt)$/],
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
-              }
+              cacheName: 'google-fonts',
+              expiration: { maxEntries: 16, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] }
             }
           },
           {
-            urlPattern: /\/api\/.*/i,
-            handler: 'NetworkFirst',
+            urlPattern: /\/uploads\/.*\.pdf$/i,
+            handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'api-cache',
-              networkTimeoutSeconds: 10,
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 5
-              }
-            }
-          },
-          {
-            urlPattern: /\/uploads\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'uploads-cache',
-              networkTimeoutSeconds: 10,
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30
-              }
+              cacheName: 'acervo-pdfs',
+              expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [0, 200] }
             }
           }
         ]
@@ -77,6 +62,19 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
+    }
+  },
+  build: {
+    target: 'es2020',
+    emptyOutDir: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          motion: ['framer-motion']
+        }
+      }
     }
   }
 })

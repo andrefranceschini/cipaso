@@ -57,3 +57,7 @@ cypress/videos
 *.tmp
 *.temp
 .cache
+
+# TypeScript incremental build
+tsconfig.tsbuildinfo
+*.tsbuildinfo
