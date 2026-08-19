@@ -1,69 +1,67 @@
 import filesData from './files.json'
 
 export type FileCategory = 'textos' | 'imagens' | 'audios' | 'videos' | 'jornais' | 'livros'
-export type FileType = 'pdf' | 'imagem' | 'audio' | 'video' | 'jornal' | 'livro'
+export type FileType = 'pdf' | 'imagem' | 'audio' | 'video'
 
 export interface DigitalFile {
   id: number
   titulo: string
+  /** Data de publicação original quando catalogada em acervo.overrides.json. */
+  data: string | null
   descricao: string
   categoria: FileCategory
-  data: string
-  path: string
+  /** Agrupamento de origem: "Jornal Ipanema", "Série 1", "Coletâneas"... */
+  serie: string
   tipo: FileType
+  tamanho: number
+  arquivo: string
+  path: string
 }
 
-export function getRandomFile(excludeAudio = false): DigitalFile {
-  let availableFiles = filesData as DigitalFile[]
-  if (excludeAudio) {
-    availableFiles = availableFiles.filter(file => file.categoria !== 'audios')
-  }
-  const randomIndex = Math.floor(Math.random() * availableFiles.length)
-  return availableFiles[randomIndex]
-}
+const files = filesData as DigitalFile[]
 
-export function getFilesByCategory(category: FileCategory): DigitalFile[] {
-  return (filesData as DigitalFile[]).filter(file => file.categoria === category)
-}
-
-export function getFileById(id: number): DigitalFile | undefined {
-  return (filesData as DigitalFile[]).find(file => file.id === id)
+export const CATEGORY_LABELS: Record<FileCategory, string> = {
+  textos: 'Documentos',
+  imagens: 'Imagens',
+  audios: 'Áudios',
+  videos: 'Vídeos',
+  jornais: 'Jornais',
+  livros: 'Publicações'
 }
 
 export function getAllFiles(): DigitalFile[] {
-  return filesData as DigitalFile[]
+  return files
 }
 
-export function searchFiles(query: string): DigitalFile[] {
-  const lowerQuery = query.toLowerCase()
-  return (filesData as DigitalFile[]).filter(file =>
-    file.titulo.toLowerCase().includes(lowerQuery) ||
-    file.descricao.toLowerCase().includes(lowerQuery)
-  )
+export function getFilesByCategory(category: FileCategory): DigitalFile[] {
+  return files.filter(file => file.categoria === category)
 }
 
-export function getRandomVideo(): DigitalFile | undefined {
-  const videos = (filesData as DigitalFile[]).filter(file => file.categoria === 'videos')
+export function getSeries(): string[] {
+  return Array.from(new Set(files.map(file => file.serie))).sort((a, b) => a.localeCompare(b, 'pt-BR'))
+}
+
+function dayOfYear(date = new Date()): number {
+  const start = Date.UTC(date.getUTCFullYear(), 0, 0)
+  return Math.floor((Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - start) / 86400000)
+}
+
+/**
+ * Item em destaque do dia: determinístico, para que todos os visitantes vejam
+ * o mesmo arquivo e o conteúdo não troque a cada renderização.
+ */
+export function getFileForDay(options: { exclude?: FileCategory[] } = {}): DigitalFile | undefined {
+  const exclude = options.exclude ?? []
+  const available = files.filter(file => !exclude.includes(file.categoria))
+
+  if (available.length === 0) return undefined
+
+  return available[dayOfYear() % available.length]
+}
+
+export function getVideoForDay(): DigitalFile | undefined {
+  const videos = getFilesByCategory('videos')
   if (videos.length === 0) return undefined
-  const randomIndex = Math.floor(Math.random() * videos.length)
-  return videos[randomIndex]
-}
 
-function getDayOfYear(date: Date = new Date()): number {
-  const start = new Date(date.getFullYear(), 0, 0)
-  const diff = date.getTime() - start.getTime()
-  const oneDay = 1000 * 60 * 60 * 24
-  return Math.floor(diff / oneDay)
-}
-
-export function getFileForDay(excludeAudio = false, dayOfYear?: number): DigitalFile | undefined {
-  let availableFiles = filesData as DigitalFile[]
-  if (excludeAudio) {
-    availableFiles = availableFiles.filter(file => file.categoria !== 'audios')
-  }
-  if (availableFiles.length === 0) return undefined
-
-  const day = dayOfYear ?? getDayOfYear()
-  const index = day % availableFiles.length
-  return availableFiles[index]
+  return videos[dayOfYear() % videos.length]
 }
