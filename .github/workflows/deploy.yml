@@ -13,6 +13,10 @@ on:
         description: 'Enviar também public/uploads (use ao adicionar arquivos ao acervo)'
         type: boolean
         default: false
+      remover_pasta_legada:
+        description: 'Apagar a pasta public_html/ criada por engano na raiz do site'
+        type: boolean
+        default: false
 
 # Um deploy por vez: evita dois envios disputando os mesmos arquivos.
 concurrency:
@@ -62,7 +66,9 @@ jobs:
           port: ${{ secrets.HOSTINGER_FTP_PORT || 21 }}
           protocol: ${{ vars.HOSTINGER_FTP_PROTOCOL || 'ftps' }}
           local-dir: ./dist/
-          server-dir: ${{ vars.HOSTINGER_FTP_PATH || 'public_html/' }}
+          # A conta de FTP já entra na raiz do site: publicar em "public_html/"
+          # criaria uma pasta duplicada dentro do domínio.
+          server-dir: ${{ vars.HOSTINGER_FTP_PATH || './' }}
           state-name: .deploy-site-state.json
           dangerous-clean-slate: false
           exclude: |
@@ -81,9 +87,34 @@ jobs:
           port: ${{ secrets.HOSTINGER_FTP_PORT || 21 }}
           protocol: ${{ vars.HOSTINGER_FTP_PROTOCOL || 'ftps' }}
           local-dir: ./dist/uploads/
-          server-dir: ${{ vars.HOSTINGER_FTP_PATH || 'public_html/' }}uploads/
+          # A conta de FTP já entra na raiz do site: publicar em "public_html/"
+          # criaria uma pasta duplicada dentro do domínio.
+          server-dir: ${{ vars.HOSTINGER_FTP_PATH || './' }}uploads/
           state-name: .deploy-uploads-state.json
           dangerous-clean-slate: false
+
+      # Limpeza pontual: o primeiro deploy por FTP publicou dentro de public_html/,
+      # que na conta de FTP já é a raiz do site. A pasta duplicada ficava acessível
+      # em cipaso.com/public_html e geraria conteúdo repetido para buscadores.
+      - name: Remover pasta duplicada
+        if: github.event_name == 'workflow_dispatch' && inputs.remover_pasta_legada
+        env:
+          FTP_HOST: ${{ secrets.HOSTINGER_HOST }}
+          FTP_USER: ${{ secrets.HOSTINGER_USER }}
+          FTP_PASS: ${{ secrets.HOSTINGER_PASS }}
+          FTP_PORT: ${{ secrets.HOSTINGER_FTP_PORT || 21 }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lftp
+          lftp -c "
+            set ssl:verify-certificate no;
+            set ftp:ssl-force true;
+            open -u '$FTP_USER','$FTP_PASS' -p $FTP_PORT ftp://$FTP_HOST;
+            glob -a rm -r public_html;
+            bye
+          "
+          echo 'Pasta public_html/ removida da raiz do site.'
 
       - name: Verificar site no ar
         run: |
