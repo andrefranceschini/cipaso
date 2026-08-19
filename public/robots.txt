@@ -1,16 +1,12 @@
 User-agent: *
 Allow: /
-Allow: /acervo
-Allow: /sobre
-Allow: /blog
-Allow: /termos
-Allow: /uploads/publicacoes/*.pdf
 
-Disallow: /uploads/videos/
-Disallow: /*.js$
-Disallow: /*.css$
+# O site é renderizado no cliente: bloquear JS/CSS impede o Google de ver o conteúdo.
+Allow: /assets/
+Allow: /*.js$
+Allow: /*.css$
+
 Disallow: /sw.js
-Disallow: /workbox-*.js
+Disallow: /workbox-
 
 Sitemap: https://cipaso.com/sitemap-index.xml
-Sitemap: https://cipaso.com/sitemap-pdfs.xml

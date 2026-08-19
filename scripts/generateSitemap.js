@@ -6,141 +6,119 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const DOMAIN = 'https://cipaso.com'
 const PUBLIC_DIR = path.join(__dirname, '../public')
-const PDFS_DIR = path.join(PUBLIC_DIR, 'uploads/publicacoes')
+const FILES_JSON = path.join(__dirname, '../src/data/files.json')
+const BLOG_JSON = path.join(__dirname, '../src/data/blog.json')
 
-function formatDate(date) {
-  return date.toISOString().split('T')[0]
+const today = new Date().toISOString().split('T')[0]
+
+const staticPages = [
+  { loc: '/', changefreq: 'monthly', priority: '1.0' },
+  { loc: '/acervo', changefreq: 'weekly', priority: '0.9' },
+  { loc: '/sobre', changefreq: 'monthly', priority: '0.8' },
+  { loc: '/blog', changefreq: 'weekly', priority: '0.8' },
+  { loc: '/termos', changefreq: 'yearly', priority: '0.2' }
+]
+
+function readJson(filePath) {
+  if (!fs.existsSync(filePath)) return []
+  return JSON.parse(fs.readFileSync(filePath, 'utf-8'))
 }
 
-function getAllPDFsRecursive(dir, baseRelativePath = '') {
-  const pdfs = []
-  if (!fs.existsSync(dir)) return pdfs
-
-  const items = fs.readdirSync(dir, { withFileTypes: true })
-
-  items.forEach(item => {
-    const fullPath = path.join(dir, item.name)
-    const relativePath = path.join(baseRelativePath, item.name).replace(/\\/g, '/')
-
-    if (item.isDirectory()) {
-      pdfs.push(...getAllPDFsRecursive(fullPath, relativePath))
-    } else if (item.isFile() && item.name.toLowerCase().endsWith('.pdf')) {
-      try {
-        const stats = fs.statSync(fullPath)
-        pdfs.push({
-          relativePath,
-          modifiedDate: formatDate(stats.mtime),
-          fileName: item.name
-        })
-      } catch (err) {
-        console.warn(`Erro ao ler ${fullPath}:`, err.message)
-      }
-    }
-  })
-
-  return pdfs
+function escapeXml(value) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
 }
 
-function generateSitemapIndex() {
-  const now = formatDate(new Date())
+function urlEntry({ loc, lastmod, changefreq, priority }) {
+  return [
+    '  <url>',
+    `    <loc>${escapeXml(loc)}</loc>`,
+    `    <lastmod>${lastmod}</lastmod>`,
+    `    <changefreq>${changefreq}</changefreq>`,
+    `    <priority>${priority}</priority>`,
+    '  </url>'
+  ].join('\n')
+}
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+function urlset(entries) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${entries.join('\n')}
+</urlset>
+`
+}
+
+function sitemapPages(posts) {
+  const pages = staticPages.map(page =>
+    urlEntry({
+      loc: `${DOMAIN}${page.loc}`,
+      lastmod: today,
+      changefreq: page.changefreq,
+      priority: page.priority
+    })
+  )
+
+  const articles = posts.map(post =>
+    urlEntry({
+      loc: `${DOMAIN}/blog/${post.slug}`,
+      lastmod: post.data || today,
+      changefreq: 'yearly',
+      priority: '0.7'
+    })
+  )
+
+  return urlset([...pages, ...articles])
+}
+
+function sitemapPdfs(files) {
+  const entries = files
+    .filter(file => file.tipo === 'pdf')
+    .map(file =>
+      urlEntry({
+        // file.path já vem percent-encoded do gerador do acervo
+        loc: `${DOMAIN}${file.path}`,
+        lastmod: file.data || today,
+        changefreq: 'yearly',
+        priority: '0.4'
+      })
+    )
+
+  return urlset(entries)
+}
+
+function sitemapIndex() {
+  const maps = ['sitemap-pages.xml', 'sitemap-pdfs.xml']
+    .map(
+      name => `  <sitemap>
+    <loc>${DOMAIN}/${name}</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>`
+    )
+    .join('\n')
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>${DOMAIN}/sitemap-pages.xml</loc>
-    <lastmod>${now}</lastmod>
-  </sitemap>
-  <sitemap>
-    <loc>${DOMAIN}/sitemap-pdfs.xml</loc>
-    <lastmod>${now}</lastmod>
-  </sitemap>
-</sitemapindex>`
-
-  return xml
+${maps}
+</sitemapindex>
+`
 }
 
-function generateSitemapPages() {
-  const now = formatDate(new Date())
+try {
+  const files = readJson(FILES_JSON)
+  const posts = readJson(BLOG_JSON)
 
-  const pages = [
-    { loc: '/', changefreq: 'monthly', priority: '1.0' },
-    { loc: '/acervo', changefreq: 'weekly', priority: '0.8' },
-    { loc: '/sobre', changefreq: 'monthly', priority: '0.8' },
-    { loc: '/blog', changefreq: 'weekly', priority: '0.5' },
-    { loc: '/termos', changefreq: 'yearly', priority: '0.3' }
-  ]
+  fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap-index.xml'), sitemapIndex())
+  fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap-pages.xml'), sitemapPages(posts))
+  fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap-pdfs.xml'), sitemapPdfs(files))
 
-  const urlEntries = pages
-    .map(
-      page => `  <url>
-    <loc>${DOMAIN}${page.loc}</loc>
-    <lastmod>${now}</lastmod>
-    <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
-  </url>`
-    )
-    .join('\n')
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urlEntries}
-</urlset>`
-
-  return xml
+  console.log(
+    `[sitemap] ✓ ${staticPages.length} página(s) + ${posts.length} artigo(s) + ${files.filter(f => f.tipo === 'pdf').length} PDF(s)`
+  )
+} catch (error) {
+  console.error(`[sitemap] erro: ${error.message}`)
+  process.exit(1)
 }
-
-function generateSitemapPDFs() {
-  const pdfs = getAllPDFsRecursive(PDFS_DIR)
-
-  if (pdfs.length === 0) {
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-</urlset>`
-    return xml
-  }
-
-  const urlEntries = pdfs
-    .map(
-      pdf => `  <url>
-    <loc>${DOMAIN}/uploads/publicacoes/${pdf.relativePath}</loc>
-    <lastmod>${pdf.modifiedDate}</lastmod>
-    <changefreq>never</changefreq>
-    <priority>0.5</priority>
-  </url>`
-    )
-    .join('\n')
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urlEntries}
-</urlset>`
-
-  return xml
-}
-
-function main() {
-  try {
-    console.log('[Sitemap] Gerando sitemaps...')
-
-    const sitemapIndex = generateSitemapIndex()
-    const sitemapPages = generateSitemapPages()
-    const sitemapPDFs = generateSitemapPDFs()
-
-    fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap-index.xml'), sitemapIndex)
-    console.log('[Sitemap] ✓ sitemap-index.xml criado')
-
-    fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap-pages.xml'), sitemapPages)
-    console.log('[Sitemap] ✓ sitemap-pages.xml criado')
-
-    fs.writeFileSync(path.join(PUBLIC_DIR, 'sitemap-pdfs.xml'), sitemapPDFs)
-    const pdfCount = getAllPDFsRecursive(PDFS_DIR).length
-    console.log(`[Sitemap] ✓ sitemap-pdfs.xml criado (${pdfCount} PDFs)`)
-
-    console.log('[Sitemap] Sucesso! Todos os sitemaps foram gerados.')
-  } catch (err) {
-    console.error('[Sitemap] Erro ao gerar sitemaps:', err.message)
-    process.exit(1)
-  }
-}
-
-main()
