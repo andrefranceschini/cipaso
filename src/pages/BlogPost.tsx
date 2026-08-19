@@ -38,20 +38,21 @@ export function BlogPost() {
         }}
       />
 
-      <article className="container-editorial py-14">
+      <article className="paper-grain">
+        <div className="container-editorial mx-auto max-w-3xl py-14">
         <header className="border-b border-rule pb-10">
           <Link to="/blog" className="link-ink inline-flex items-center gap-2 text-sm">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Artigos
           </Link>
 
-          <p className="eyebrow mt-8 text-brand-ink">{CATEGORY_LABELS[post.categoria]}</p>
+          <p className="eyebrow eyebrow-lum mt-8">{CATEGORY_LABELS[post.categoria]}</p>
 
-          <h1 className="mt-4 max-w-4xl font-display text-[clamp(2.125rem,5.5vw,3.75rem)] leading-[1.05] text-ink">
+          <h1 className="mt-4 font-display text-[clamp(2rem,5vw,3.25rem)] leading-[1.05] text-ink">
             {post.titulo}
           </h1>
 
-          <p className="mt-6 max-w-2xl text-lg text-muted">{post.resumo}</p>
+          <p className="mt-6 text-lg text-muted">{post.resumo}</p>
 
           <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-3 text-xs text-muted">
             <div>
@@ -71,10 +72,10 @@ export function BlogPost() {
           </dl>
         </header>
 
-        <div className="article-body measure mt-12">{renderMarkdown(post.conteudo)}</div>
+        <div className="article-body mt-12">{renderMarkdown(post.conteudo)}</div>
 
         {post.tags.length > 0 && (
-          <div className="measure mt-12 border-t border-rule pt-6">
+          <div className="mt-12 border-t border-rule pt-6">
             <h2 className="eyebrow">Temas</h2>
             <ul className="mt-3 flex flex-wrap gap-2">
               {post.tags.map(tag => (
@@ -92,11 +93,14 @@ export function BlogPost() {
               Continuar lendo
             </h2>
 
-            <ol className="mt-6 grid gap-px bg-rule sm:grid-cols-3">
+            <ol className="mt-6 grid gap-4 sm:grid-cols-3">
               {related.map(item => (
-                <li key={item.slug} className="bg-paper">
-                  <Link to={`/blog/${item.slug}`} className="group flex h-full flex-col gap-3 p-6">
-                    <span className="eyebrow text-brand-ink">{CATEGORY_LABELS[item.categoria]}</span>
+                <li key={item.slug}>
+                  <Link
+                    to={`/blog/${item.slug}`}
+                    className="sheet sheet-interactive group flex h-full flex-col gap-3 p-6"
+                  >
+                    <span className="eyebrow eyebrow-lum">{CATEGORY_LABELS[item.categoria]}</span>
                     <span className="font-display text-xl leading-tight text-ink group-hover:text-brand-ink">
                       {item.titulo}
                     </span>
@@ -110,6 +114,7 @@ export function BlogPost() {
             </ol>
           </aside>
         )}
+        </div>
       </article>
     </>
   )

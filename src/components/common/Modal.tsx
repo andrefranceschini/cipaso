@@ -100,9 +100,9 @@ export function Modal({ isOpen, onClose, title, description, children }: ModalPr
             animate={{ opacity: 1, y: 0 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="relative my-auto w-full max-w-4xl bg-paper border border-rule-strong rounded-sheet shadow-2xl"
+            className="relative my-auto flex max-h-[calc(100svh-2rem)] w-full max-w-4xl flex-col rounded-sheet border border-rule-strong bg-sunken shadow-2xl"
           >
-            <div className="flex items-start justify-between gap-4 border-b border-rule px-5 py-4 sm:px-6">
+            <div className="flex shrink-0 items-start justify-between gap-4 border-b border-rule px-5 py-4 sm:px-6">
               <div className="min-w-0">
                 <h2 id={titleId} className="font-display text-xl text-ink truncate">
                   {title}
@@ -124,7 +124,7 @@ export function Modal({ isOpen, onClose, title, description, children }: ModalPr
               </button>
             </div>
 
-            <div className="px-5 py-5 sm:px-6">{children}</div>
+            <div className="min-h-0 overflow-y-auto px-5 py-5 sm:px-6">{children}</div>
           </motion.div>
         </div>
       )}

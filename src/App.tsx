@@ -26,7 +26,7 @@ function RouteFallback() {
 export default function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
+    <BrowserRouter>
         <RouteChange />
 
         <a
@@ -56,7 +56,7 @@ export default function App() {
 
           <Footer />
         </div>
-      </BrowserRouter>
+    </BrowserRouter>
     </ThemeProvider>
   )
 }

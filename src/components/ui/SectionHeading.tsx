@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 interface SectionHeadingProps {
-  /** Numeração da seção, no espírito de um sumário impresso ("01", "02"...). */
+  /** Numeração da seção, como marcação de protocolo de registro ("01", "02"...). */
   index?: string
   eyebrow?: string
   title: ReactNode
@@ -22,28 +22,31 @@ export function SectionHeading({
   className
 }: SectionHeadingProps) {
   return (
-    <div className={cn('border-t border-rule pt-5', align === 'center' && 'text-center', className)}>
+    <div
+      className={cn(
+        'relative border-t border-rule pt-6',
+        align === 'center' && 'text-center',
+        className
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className="absolute -top-px left-0 h-px w-24 bg-brand shadow-[0_0_12px_rgb(92_189_191/0.8)]"
+      />
+
       {(index || eyebrow) && (
-        <div
-          className={cn(
-            'eyebrow mb-4 flex items-baseline gap-3',
-            align === 'center' && 'justify-center'
+        <div className={cn('mb-5 flex items-baseline gap-3', align === 'center' && 'justify-center')}>
+          {index && (
+            <span className="font-display text-2xl leading-none text-brand-ink text-glow tabular">{index}</span>
           )}
-        >
-          {index && <span className="tabular text-brand-ink">{index}</span>}
-          {eyebrow && <span>{eyebrow}</span>}
+          {eyebrow && <span className="eyebrow">{eyebrow}</span>}
         </div>
       )}
 
-      <Heading className="text-3xl sm:text-4xl lg:text-[2.75rem]">{title}</Heading>
+      <Heading className="text-3xl text-ink sm:text-4xl lg:text-[2.75rem]">{title}</Heading>
 
       {description && (
-        <p
-          className={cn(
-            'mt-4 text-lg text-muted measure',
-            align === 'center' && 'mx-auto'
-          )}
-        >
+        <p className={cn('mt-4 text-lg text-muted measure', align === 'center' && 'mx-auto')}>
           {description}
         </p>
       )}

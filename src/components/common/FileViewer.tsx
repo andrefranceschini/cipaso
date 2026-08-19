@@ -31,7 +31,7 @@ export function FileViewer({ file }: FileViewerProps) {
   return (
     <div className="space-y-5">
       {file.tipo === 'pdf' && (
-        <div className="h-[65vh] min-h-80 w-full overflow-hidden border border-rule bg-sunken">
+        <div className="h-[48vh] min-h-64 w-full overflow-hidden border border-rule bg-paper">
           <iframe src={file.path} title={`Documento: ${file.titulo}`} className="h-full w-full" loading="lazy" />
         </div>
       )}

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { FileText, Film, Image as ImageIcon, Music, Search, X } from 'lucide-react'
+import { ChevronDown, FileText, Film, Image as ImageIcon, Music, Search, X } from 'lucide-react'
 import { SEO } from '@/components/SEO'
 import { Modal } from '@/components/common/Modal'
 import { FileViewer } from '@/components/common/FileViewer'
@@ -124,7 +124,7 @@ export function Acervo() {
                   resetPagination()
                 }}
                 placeholder="Título, descrição ou nome do arquivo"
-                className="w-full border border-rule bg-raised py-2.5 pl-9 pr-9 text-ink placeholder:text-faint focus:border-brand-ink focus:outline-none"
+                className="h-11 w-full border border-rule bg-raised pl-9 pr-9 text-ink placeholder:text-faint focus:border-brand-ink focus:outline-none"
               />
               {query && (
                 <button
@@ -146,18 +146,24 @@ export function Acervo() {
             <label htmlFor="ordem-acervo" className="eyebrow block">
               Ordenar por
             </label>
-            <select
-              id="ordem-acervo"
-              value={sort}
-              onChange={event => setSort(event.target.value as SortOption)}
-              className="mt-3 w-full border border-rule bg-raised px-3 py-2.5 text-ink focus:border-brand-ink focus:outline-none md:w-56"
-            >
-              {Object.entries(sortLabels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+            <div className="relative mt-3 md:w-64">
+              <select
+                id="ordem-acervo"
+                value={sort}
+                onChange={event => setSort(event.target.value as SortOption)}
+                className="h-11 w-full appearance-none border border-rule bg-raised pl-3 pr-9 text-sm text-ink scheme-dark focus:border-brand-dim focus:outline-none"
+              >
+                {Object.entries(sortLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-faint"
+                aria-hidden="true"
+              />
+            </div>
           </div>
         </div>
 
@@ -172,10 +178,10 @@ export function Acervo() {
               }}
               aria-pressed={serie === null}
               className={cn(
-                'border px-3 py-1.5 text-sm transition-colors',
+                'inline-flex h-11 items-center border px-4 text-sm transition-colors',
                 serie === null
-                  ? 'border-brand-ink bg-brand-ink text-on-brand-ink'
-                  : 'border-rule text-muted hover:border-brand-ink hover:text-ink'
+                  ? 'border-brand-dim bg-brand-wash text-brand-ink shadow-[0_0_16px_rgb(92_189_191/0.12)]'
+                  : 'border-rule text-muted hover:border-brand-dim hover:text-ink'
               )}
             >
               Tudo ({allFiles.length})
@@ -195,10 +201,10 @@ export function Acervo() {
                   }}
                   aria-pressed={isActive}
                   className={cn(
-                    'border px-3 py-1.5 text-sm transition-colors',
+                    'inline-flex h-11 items-center border px-4 text-sm transition-colors',
                     isActive
-                      ? 'border-brand-ink bg-brand-ink text-on-brand-ink'
-                      : 'border-rule text-muted hover:border-brand-ink hover:text-ink'
+                      ? 'border-brand-dim bg-brand-wash text-brand-ink shadow-[0_0_16px_rgb(92_189_191/0.12)]'
+                      : 'border-rule text-muted hover:border-brand-dim hover:text-ink'
                   )}
                 >
                   {name} ({total})
@@ -217,16 +223,16 @@ export function Acervo() {
         {/* Índice do acervo */}
         {results.length > 0 ? (
           <>
-            <ol className="mt-4 border-t border-rule">
+            <ol className="sheet mt-6 divide-y divide-rule">
               {shown.map((file, index) => {
                 const Icon = typeIcons[file.tipo]
 
                 return (
-                  <li key={file.id} className="border-b border-rule">
+                  <li key={file.id}>
                     <button
                       type="button"
                       onClick={() => setSelected(file)}
-                      className="group grid w-full grid-cols-[3rem_1fr] items-baseline gap-x-4 gap-y-1.5 py-4 text-left transition-colors hover:bg-brand-wash/60 md:grid-cols-[3rem_1fr_8rem_11rem_4.5rem]"
+                      className="group grid w-full grid-cols-[3rem_1fr] items-baseline gap-x-4 gap-y-1.5 px-5 py-4 text-left transition-colors hover:bg-brand-wash md:grid-cols-[3rem_1fr_8rem_11rem_4.5rem]"
                     >
                       <span className="eyebrow tabular text-faint">{String(index + 1).padStart(3, '0')}</span>
 

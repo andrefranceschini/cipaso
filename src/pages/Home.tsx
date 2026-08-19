@@ -43,51 +43,66 @@ export function Home() {
         path="/"
       />
 
-      {/* Masthead */}
-      <section className="paper-grain border-b border-rule">
-        <div className="container-editorial py-16 md:py-24">
-          <Reveal immediate>
-            <p className="eyebrow">Memorial digital · Sorocaba, São Paulo</p>
+      {/* Masthead: dimensionado para caber inteiro na viewport em qualquer tela */}
+      <section className="paper-grain relative border-b border-rule">
+        {/* Símbolo do CIPASO como marca d'água, fora do fluxo do texto */}
+        <img
+          src="/favicon.svg"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-[8%] top-1/2 hidden w-[46vw] max-w-2xl -translate-y-1/2 opacity-[0.07] select-none md:block"
+        />
 
-            <h1 className="mt-6 font-display text-[clamp(2.5rem,8.5vw,6.5rem)] leading-[0.95] text-ink">
-              Centro de Investigação
-              <br />
-              <span className="text-brand-ink">Parapsicológica</span>
-              <br />
-              de Sorocaba
+        <div className="container-editorial flex min-h-[calc(100svh-4.35rem)] flex-col justify-center gap-[clamp(1.25rem,3vh,2.5rem)] py-[clamp(1.5rem,4vh,3.5rem)]">
+          <Reveal immediate>
+            <p className="eyebrow flex items-center gap-3">
+              <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand" aria-hidden="true" />
+              Memorial digital · Sorocaba, São Paulo
+            </p>
+
+            <h1 className="mt-[clamp(0.75rem,2vh,1.5rem)]">
+              <span className="text-glow block font-display text-[clamp(4rem,17vw,11rem)] leading-[0.85] tracking-tight text-brand-ink">
+                CIPASO
+              </span>
+              <span className="mt-[clamp(0.5rem,1.5vh,1rem)] block max-w-3xl font-display text-[clamp(1.15rem,3vw,1.9rem)] leading-tight text-ink">
+                Centro de Investigação Parapsicológica de Sorocaba
+              </span>
             </h1>
 
-            <p className="mt-8 max-w-2xl text-lg leading-relaxed text-muted">
+            <p className="mt-[clamp(0.75rem,2vh,1.5rem)] max-w-xl text-[clamp(0.9375rem,1.2vw,1.0625rem)] leading-relaxed text-muted">
               Um arquivo aberto da pesquisa, do ensino e da produção do CIPASO entre 1989 e 2016, e do trabalho
               do Prof. Valter Álfredo Franceschini.
             </p>
           </Reveal>
 
           <Reveal immediate delay={0.1}>
-            <dl className="mt-12 grid max-w-3xl grid-cols-2 gap-px border border-rule bg-rule sm:grid-cols-4">
-              {[
-                { label: 'Fundação', value: '1989' },
-                { label: 'Encerramento', value: '2016' },
-                { label: 'Itens no acervo', value: String(totalFiles) },
-                { label: 'Artigos', value: String(getAllPosts().length) }
-              ].map(item => (
-                <div key={item.label} className="bg-paper p-4">
-                  <dt className="eyebrow">{item.label}</dt>
-                  <dd className="mt-2 font-display text-2xl tabular text-ink">{item.value}</dd>
-                </div>
-              ))}
-            </dl>
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+              <div className="flex flex-wrap gap-3">
+                <ButtonLink to="/acervo">
+                  Explorar o acervo
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </ButtonLink>
+                <ButtonLink to="/sobre" variant="outline">
+                  Conhecer a história
+                </ButtonLink>
+              </div>
 
-            <div className="mt-10 flex flex-wrap gap-4">
-              <ButtonLink to="/acervo">
-                Explorar o acervo
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </ButtonLink>
-              <ButtonLink to="/sobre" variant="outline">
-                Conhecer a história
-              </ButtonLink>
+              <dl className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                {[
+                  { label: 'Fundação', value: '1989' },
+                  { label: 'Encerramento', value: '2016' },
+                  { label: 'Itens', value: String(totalFiles) },
+                  { label: 'Artigos', value: String(getAllPosts().length) }
+                ].map(item => (
+                  <div key={item.label} className="flex items-baseline gap-2">
+                    <dd className="font-display text-lg tabular text-ink">{item.value}</dd>
+                    <dt className="eyebrow text-[0.575rem]">{item.label}</dt>
+                  </div>
+                ))}
+              </dl>
             </div>
           </Reveal>
+
         </div>
       </section>
 
@@ -142,27 +157,32 @@ export function Home() {
             />
           </Reveal>
 
-          <ol className="mt-10 border-t border-rule">
+          <ol className="mt-10 grid gap-5 sm:grid-cols-2">
             {posts.map((post, index) => (
-              <Reveal as="li" key={post.slug} delay={index * 0.05}>
+              <Reveal as="li" key={post.slug} delay={index * 0.06} className="h-full">
                 <Link
                   to={`/blog/${post.slug}`}
-                  className="group grid gap-3 border-b border-rule py-7 md:grid-cols-[7rem_1fr_auto] md:items-baseline md:gap-8"
+                  className="sheet sheet-interactive group flex h-full flex-col gap-4 p-7"
                 >
-                  <span className="eyebrow tabular text-brand-ink">
-                    {String(index + 1).padStart(2, '0')} · {CATEGORY_LABELS[post.categoria]}
-                  </span>
-
-                  <span>
-                    <span className="font-display text-2xl leading-tight text-ink transition-colors group-hover:text-brand-ink">
-                      {post.titulo}
+                  <span className="flex items-center justify-between gap-4">
+                    <span className="eyebrow eyebrow-lum tabular">
+                      {String(index + 1).padStart(2, '0')} · {CATEGORY_LABELS[post.categoria]}
                     </span>
-                    <span className="mt-2 block text-muted measure">{post.resumo}</span>
+                    <time dateTime={post.data} className="text-xs text-faint tabular">
+                      {formatDate(post.data, 'short')}
+                    </time>
                   </span>
 
-                  <time dateTime={post.data} className="text-xs text-muted tabular">
-                    {formatDate(post.data, 'short')}
-                  </time>
+                  <span className="font-display text-2xl leading-tight text-ink transition-colors group-hover:text-brand-ink">
+                    {post.titulo}
+                  </span>
+
+                  <span className="text-sm leading-relaxed text-muted">{post.resumo}</span>
+
+                  <span className="mt-auto inline-flex items-center gap-2 border-t border-rule pt-4 text-xs font-semibold uppercase tracking-[0.16em] text-brand-ink">
+                    Ler artigo
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                  </span>
                 </Link>
               </Reveal>
             ))}
@@ -212,11 +232,16 @@ export function Home() {
             </Reveal>
 
             <Reveal delay={0.08}>
-              <dl className="divide-y divide-rule border-y border-rule">
-                {values.map(value => (
-                  <div key={value.term} className="grid gap-2 py-5 sm:grid-cols-[10rem_1fr] sm:gap-6">
-                    <dt className="eyebrow pt-1">{value.term}</dt>
-                    <dd className="text-ink">{value.definition}</dd>
+              <dl className="grid gap-5 sm:grid-cols-2">
+                {values.map((value, index) => (
+                  <div key={value.term} className="sheet p-6">
+                    <dt className="flex items-baseline gap-3">
+                      <span className="font-display text-xl leading-none text-brand-ink tabular">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                      <span className="eyebrow">{value.term}</span>
+                    </dt>
+                    <dd className="mt-4 text-sm leading-relaxed text-muted">{value.definition}</dd>
                   </div>
                 ))}
               </dl>

@@ -16,9 +16,10 @@ const publicDir = path.join(__dirname, '../public')
 const faviconPath = path.join(publicDir, 'favicon.svg')
 const wordmarkPath = path.join(__dirname, '../src/assets/png/cipaso-logo.png')
 
-const PAPER = [247, 244, 239]
+// Identidade escura do site: ícones e imagem social no mesmo fundo profundo
+const PAPER = [6, 9, 13]
 const BRAND = [92, 189, 191]
-const INK = [22, 24, 26]
+const INK = [233, 241, 242]
 const SUPERSAMPLE = 4
 
 // ---------------------------------------------------------------- PNG encode
@@ -433,6 +434,28 @@ function keyOutCheckerboard(image) {
   return { width: image.width, height: image.height, data }
 }
 
+/**
+ * O subtítulo do logotipo é azul-marinho escuro — invisível sobre o fundo
+ * escuro do site. Repinta os glifos escuros com a cor de tinta clara,
+ * preservando o turquesa do CIPASO.
+ */
+function recolorDarkGlyphs(image, color) {
+  const data = Buffer.from(image.data)
+
+  for (let i = 0; i < image.width * image.height; i++) {
+    if (data[i * 4 + 3] === 0) continue
+
+    const max = Math.max(data[i * 4], data[i * 4 + 1], data[i * 4 + 2])
+    if (max < 130) {
+      data[i * 4] = color[0]
+      data[i * 4 + 1] = color[1]
+      data[i * 4 + 2] = color[2]
+    }
+  }
+
+  return { width: image.width, height: image.height, data }
+}
+
 /** Recorta a área com conteúdo visível, descartando as margens transparentes. */
 function trimTransparent(image) {
   let minX = image.width
@@ -501,7 +524,10 @@ function buildOgImage(svg, wordmark) {
 
 try {
   const svg = parseSvg(fs.readFileSync(faviconPath, 'utf-8'))
-  const wordmark = trimTransparent(keyOutCheckerboard(decodePng(fs.readFileSync(wordmarkPath))))
+  const wordmark = recolorDarkGlyphs(
+    trimTransparent(keyOutCheckerboard(decodePng(fs.readFileSync(wordmarkPath)))),
+    INK
+  )
 
   writeAsset('pwa-192x192.png', buildIcon(svg, 192, PAPER, BRAND))
   writeAsset('pwa-512x512.png', buildIcon(svg, 512, PAPER, BRAND))

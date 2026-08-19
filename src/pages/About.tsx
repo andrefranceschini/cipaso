@@ -1,6 +1,8 @@
 import { ArrowRight } from 'lucide-react'
 import { SEO } from '@/components/SEO'
 import { Reveal } from '@/components/motion/Reveal'
+import { Brainwaves } from '@/components/motion/Brainwaves'
+import { cn } from '@/lib/utils'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { ButtonLink } from '@/components/ui/Button'
 import valterPhoto from '@/assets/png/vaf/Valter Franceschini.jpg'
@@ -62,36 +64,47 @@ export function About() {
       </section>
 
       <section className="container-editorial py-20">
-        <div className="grid gap-12 lg:grid-cols-[1fr_20rem] lg:gap-16">
-          <Reveal className="space-y-6 text-lg leading-relaxed text-muted measure">
-            <p>
-              O <strong className="text-ink">Centro de Investigação Parapsicológica de Sorocaba</strong> dedicava-se
-              ao estudo experimental dos fenômenos exteriorizados através da paranormalidade — capacidade humana
-              de percepção hiperestésica e de conhecimento extrassensorial.
-            </p>
-            <p>
-              Fundado em 1989 pelo Prof. Valter Álfredo Franceschini, o centro desenvolveu e divulgou métodos de
-              cura, orientação e aconselhamento, sempre acompanhados de ensino aberto ao público — em cursos,
-              palestras e colunas publicadas na imprensa local.
-            </p>
-            <p>
-              Junto dele funcionou a <strong className="text-ink">Parâmetros Holísticos — Formação Humana LTDA.</strong>,
-              braço responsável pela formação e pelas publicações. As duas organizações estão inativas; este
-              memorial existe para preservar o que produziram.
-            </p>
-          </Reveal>
+        <Reveal>
+          <p className="max-w-4xl text-xl leading-relaxed text-ink md:text-2xl md:leading-relaxed">
+            O <strong className="text-brand-ink">Centro de Investigação Parapsicológica de Sorocaba</strong>{' '}
+            dedicava-se ao estudo experimental dos fenômenos exteriorizados através da paranormalidade —
+            capacidade humana de percepção hiperestésica e de conhecimento extrassensorial.
+          </p>
+        </Reveal>
 
-          <Reveal delay={0.08}>
-            <ol className="border-t border-rule">
-              {timeline.map(item => (
-                <li key={item.year} className="grid grid-cols-[5.5rem_1fr] gap-4 border-b border-rule py-4">
-                  <span className="eyebrow tabular pt-0.5 text-brand-ink">{item.year}</span>
-                  <span className="text-sm text-ink">{item.event}</span>
-                </li>
-              ))}
-            </ol>
-          </Reveal>
-        </div>
+        <Reveal delay={0.06} className="mt-10 grid gap-8 border-t border-rule pt-8 leading-relaxed text-muted md:grid-cols-2 md:gap-12">
+          <p>
+            Fundado em 1989 pelo Prof. Valter Álfredo Franceschini, o centro desenvolveu e divulgou métodos de
+            cura, orientação e aconselhamento, sempre acompanhados de ensino aberto ao público — em cursos,
+            palestras e colunas publicadas na imprensa local.
+          </p>
+          <p>
+            Junto dele funcionou a <strong className="text-ink">Parâmetros Holísticos — Formação Humana LTDA.</strong>,
+            braço responsável pela formação e pelas publicações. As duas organizações estão inativas; este
+            memorial existe para preservar o que produziram.
+          </p>
+        </Reveal>
+
+        {/* Linha do tempo horizontal */}
+        <Reveal delay={0.08} className="mt-16">
+          <h2 className="sr-only">Linha do tempo</h2>
+          <ol className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
+            {timeline.map((item, index) => (
+              <li key={item.year} className="relative border-t border-rule pt-6">
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'absolute -top-[3.5px] left-0 h-1.5 w-1.5 rounded-full bg-brand',
+                    'shadow-[0_0_10px_rgb(92_189_191/0.9)]',
+                    index === timeline.length - 1 && 'pulse-dot'
+                  )}
+                />
+                <span className="font-display text-2xl leading-none text-brand-ink tabular">{item.year}</span>
+                <p className="mt-3 text-sm leading-relaxed text-muted">{item.event}</p>
+              </li>
+            ))}
+          </ol>
+        </Reveal>
       </section>
 
       <section className="border-y border-rule bg-sunken" aria-labelledby="lei">
@@ -123,17 +136,27 @@ export function About() {
             index="02"
             eyebrow="Metodologia"
             title={<span id="ferramentas">As 5 Ferramentas Mentais</span>}
-            description="Trabalhadas nos níveis cerebrais beta, alfa, teta e delta."
+            description="Trabalhadas nos níveis cerebrais beta, alfa, teta e delta — os quatro ritmos elétricos do cérebro."
           />
         </Reveal>
 
-        <ol className="mt-10 border-t border-rule">
+        <Reveal delay={0.08}>
+          <div className="sheet mt-10 overflow-hidden px-6 py-4">
+            <Brainwaves labeled className="h-40" />
+          </div>
+        </Reveal>
+
+        <ol className="mt-6 grid gap-5 lg:grid-cols-2">
           {tools.map((tool, index) => (
-            <Reveal as="li" key={tool.title} delay={index * 0.05}>
-              <div className="grid gap-2 border-b border-rule py-6 md:grid-cols-[4rem_1fr_1fr] md:gap-8">
-                <span className="eyebrow tabular text-brand-ink">{String(index + 1).padStart(2, '0')}</span>
-                <h3 className="font-display text-xl leading-tight text-ink">{tool.title}</h3>
-                <p className="text-muted">{tool.description}</p>
+            <Reveal as="li" key={tool.title} delay={index * 0.05} className={index === 4 ? 'lg:col-span-2' : undefined}>
+              <div className="sheet flex h-full gap-5 p-6">
+                <span className="font-display text-3xl leading-none text-brand-ink text-glow tabular">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <h3 className="font-display text-xl leading-tight text-ink">{tool.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted">{tool.description}</p>
+                </div>
               </div>
             </Reveal>
           ))}
@@ -145,9 +168,9 @@ export function About() {
           <SectionHeading index="03" eyebrow="Biografia" title={<span id="professor">Prof. Valter Franceschini</span>} />
         </Reveal>
 
-        <div className="mt-10 grid gap-12 lg:grid-cols-[22rem_1fr] lg:gap-16">
-          <Reveal>
-            <figure>
+        <Reveal delay={0.06}>
+          <div className="sheet mt-10 grid overflow-hidden lg:grid-cols-[minmax(0,22rem)_1fr]">
+            <figure className="border-b border-rule lg:border-b-0 lg:border-r">
               <img
                 src={valterPhoto}
                 alt="Prof. Valter Álfredo Franceschini, fundador do CIPASO"
@@ -155,39 +178,50 @@ export function About() {
                 height={469}
                 loading="lazy"
                 decoding="async"
-                className="w-full border border-rule object-cover"
+                className="h-64 w-full object-cover object-top sm:h-80 lg:h-auto lg:min-h-full"
               />
-              <figcaption className="mt-3 border-t border-rule pt-3 text-xs text-muted">
-                Campinas, 02/08/1940 — Sorocaba, 18/02/2016 (75 anos)
-              </figcaption>
             </figure>
-          </Reveal>
 
-          <Reveal delay={0.08} className="space-y-5 text-lg leading-relaxed text-muted measure">
-            <p>
-              <strong className="text-ink">Escritor, conferencista, parapsicólogo, professor e operador dos
-              fenômenos PSI</strong>, foi o idealizador e mentor do CIPASO.
-            </p>
-            <p>
-              Sua proposta de unir ciência e humanismo definiu a filosofia da instituição. Foram mais de 55 anos
-              de magistério e centenas de alunos formados.
-            </p>
-            <blockquote className="border-l-2 border-brand pl-5 font-display text-xl leading-snug text-ink">
-              “Sem Deus na vida, nada caminha.”
-            </blockquote>
-            <p>
-              O trabalho segue acessível aqui, em documentos, artigos e registros audiovisuais reunidos pela
-              família e por amigos.
-            </p>
+            <div className="flex flex-col gap-6 p-7 sm:p-9 lg:p-11">
+              <p className="text-lg leading-relaxed text-muted measure">
+                <strong className="text-ink">
+                  Escritor, conferencista, parapsicólogo, professor e operador dos fenômenos PSI
+                </strong>
+                , foi o idealizador e mentor do CIPASO. Sua proposta de unir ciência e humanismo definiu a
+                filosofia da instituição — foram mais de 55 anos de magistério e centenas de alunos formados.
+              </p>
 
-            <div className="pt-4">
-              <ButtonLink to="/acervo">
-                Visitar o acervo digital
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </ButtonLink>
+              <blockquote className="border-y border-rule py-5 text-center font-display text-2xl leading-snug text-brand-ink">
+                “Sem Deus na vida, nada caminha.”
+              </blockquote>
+
+              <p className="leading-relaxed text-muted measure">
+                O trabalho segue acessível aqui, em documentos, artigos e registros audiovisuais reunidos pela
+                família e por amigos.
+              </p>
+
+              <div className="mt-auto flex flex-wrap items-end justify-between gap-6 border-t border-rule pt-6">
+                <dl className="flex gap-10">
+                  <div>
+                    <dt className="eyebrow">Nascimento</dt>
+                    <dd className="mt-1 text-sm text-ink tabular">02.08.1940</dd>
+                    <dd className="text-xs text-faint whitespace-nowrap">Campinas, SP</dd>
+                  </div>
+                  <div>
+                    <dt className="eyebrow">Falecimento</dt>
+                    <dd className="mt-1 text-sm text-ink tabular">18.02.2016</dd>
+                    <dd className="text-xs text-faint whitespace-nowrap">Sorocaba, SP · 75 anos</dd>
+                  </div>
+                </dl>
+
+                <ButtonLink to="/acervo">
+                  Visitar o acervo digital
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </ButtonLink>
+              </div>
             </div>
-          </Reveal>
-        </div>
+          </div>
+        </Reveal>
       </section>
     </>
   )

@@ -6,12 +6,14 @@ type Variant = 'solid' | 'outline' | 'ghost'
 type Size = 'sm' | 'md'
 
 const base =
-  'inline-flex items-center justify-center gap-2 font-medium rounded-[3px] transition-colors duration-200 ' +
+  'inline-flex items-center justify-center gap-2 font-semibold rounded-sheet transition-all duration-200 ' +
   'disabled:opacity-50 disabled:pointer-events-none'
 
 const variants: Record<Variant, string> = {
-  solid: 'bg-brand-ink text-on-brand-ink hover:bg-ink',
-  outline: 'border border-rule-strong text-ink hover:border-brand-ink hover:text-brand-ink',
+  solid:
+    'bg-brand text-on-brand hover:bg-brand-ink hover:shadow-[0_0_24px_rgb(92_189_191/0.35)]',
+  outline:
+    'border border-rule-strong bg-brand-wash/0 text-ink hover:border-brand-dim hover:bg-brand-wash hover:text-brand-ink',
   ghost: 'text-brand-ink hover:bg-brand-wash'
 }
 

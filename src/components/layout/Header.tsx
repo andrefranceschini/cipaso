@@ -19,12 +19,12 @@ function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      aria-pressed={isDark}
+      aria-pressed={!isDark}
       aria-label={isDark ? 'Ativar tema claro' : 'Ativar tema escuro'}
       title={isDark ? 'Tema claro' : 'Tema escuro'}
-      className="p-2 -m-2 text-muted hover:text-brand-ink transition-colors"
+      className="p-2 -m-2 text-muted transition-colors hover:text-brand-ink"
     >
-      {isDark ? <Sun className="h-[1.15rem] w-[1.15rem]" /> : <Moon className="h-[1.15rem] w-[1.15rem]" />}
+      {isDark ? <Sun className="h-[1.1rem] w-[1.1rem]" /> : <Moon className="h-[1.1rem] w-[1.1rem]" />}
     </button>
   )
 }
@@ -53,21 +53,23 @@ export function Header() {
   }, [menuOpen])
 
   return (
-    <header className="sticky top-0 z-50 bg-paper/95 backdrop-blur-sm border-b border-rule">
-      <div className="h-[3px] bg-brand" aria-hidden="true" />
+    <header className="sticky top-0 z-50 border-b border-rule bg-paper/85 backdrop-blur-md">
+      <div className="h-px bg-linear-to-r from-transparent via-brand/70 to-transparent" aria-hidden="true" />
 
       <div className="container-editorial">
-        <div className="flex h-[4.25rem] items-center justify-between gap-6">
-          <Link to="/" className="flex items-center gap-3 shrink-0 group" aria-label="Memorial CIPASO, página inicial">
-            <img src="/favicon.svg" alt="" width={36} height={36} className="h-9 w-9" />
+        <div className="flex h-17 items-center justify-between gap-6">
+          <Link to="/" className="flex items-center gap-3 shrink-0" aria-label="Memorial CIPASO, página inicial">
+            <img src="/favicon.svg" alt="" width={34} height={34} className="h-8.5 w-8.5" />
             <span className="flex flex-col leading-none">
-              <span className="font-display text-[1.6rem] tracking-tight text-ink">CIPASO</span>
-              <span className="eyebrow mt-1 hidden text-[0.625rem] sm:block">Memorial Digital · 1989–2016</span>
+              <span className="font-display text-[1.55rem] tracking-tight text-ink">CIPASO</span>
+              <span className="eyebrow mt-1 hidden text-[0.595rem] sm:block">
+                Memorial digital · 1989–2016
+              </span>
             </span>
           </Link>
 
           <nav aria-label="Navegação principal" className="hidden md:block">
-            <ul className="flex items-center gap-8">
+            <ul className="flex items-center gap-9">
               {navItems.map(item => (
                 <li key={item.to}>
                   <NavLink
@@ -75,10 +77,11 @@ export function Header() {
                     end={item.to === '/'}
                     className={({ isActive }) =>
                       cn(
-                        'relative py-1 text-sm transition-colors',
-                        'after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0',
-                        'after:bg-brand-ink after:transition-transform after:duration-300 hover:after:scale-x-100',
-                        isActive ? 'text-ink after:scale-x-100' : 'text-muted hover:text-ink'
+                        'relative py-1 text-[0.72rem] font-semibold uppercase tracking-[0.18em] transition-colors',
+                        'after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:origin-left after:scale-x-0',
+                        'after:bg-brand-ink after:shadow-[0_0_8px_rgb(92_189_191/0.8)]',
+                        'after:transition-transform after:duration-300 hover:after:scale-x-100',
+                        isActive ? 'text-brand-ink after:scale-x-100' : 'text-muted hover:text-ink'
                       )
                     }
                   >
@@ -89,7 +92,7 @@ export function Header() {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-6">
             <ThemeToggle />
 
             <button
@@ -115,7 +118,7 @@ export function Header() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="md:hidden overflow-hidden border-t border-rule bg-paper"
+            className="md:hidden overflow-hidden border-t border-rule bg-sunken"
           >
             <nav aria-label="Navegação principal" className="container-editorial py-4">
               <ul className="flex flex-col">
@@ -125,7 +128,10 @@ export function Header() {
                       to={item.to}
                       end={item.to === '/'}
                       className={({ isActive }) =>
-                        cn('flex items-center justify-between py-3 text-base', isActive ? 'text-brand-ink' : 'text-ink')
+                        cn(
+                          'flex items-center justify-between py-3.5 text-sm font-semibold uppercase tracking-[0.14em]',
+                          isActive ? 'text-brand-ink' : 'text-ink'
+                        )
                       }
                     >
                       {item.label}

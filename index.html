@@ -13,8 +13,8 @@
 
     <meta name="author" content="Memorial CIPASO" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f7f4ef" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#06090d" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Memorial CIPASO" />
@@ -67,17 +67,26 @@
       }
     </script>
 
+    <style>
+      /* Fundo pintado antes de qualquer CSS carregar: sem flash claro */
+      html {
+        background: #06090d;
+      }
+      html.light {
+        background: #eef3f4;
+      }
+    </style>
     <script>
-      // Aplica o tema antes da primeira pintura: evita o flash de tela clara.
+      // O escuro é o padrão; aplica o claro antes da primeira pintura se salvo.
       ;(function () {
         try {
-          var stored = localStorage.getItem('theme')
-          var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
-          if (dark) document.documentElement.classList.add('dark')
-          var meta = document.querySelector('meta[name="theme-color"]')
-          if (meta) meta.setAttribute('content', dark ? '#101315' : '#f7f4ef')
+          if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.add('light')
+            var meta = document.querySelector('meta[name="theme-color"]')
+            if (meta) meta.setAttribute('content', '#eef3f4')
+          }
         } catch (error) {
-          /* localStorage bloqueado: segue com o tema claro */
+          /* armazenamento bloqueado: mantém o escuro */
         }
       })()
     </script>

@@ -38,8 +38,7 @@ const sections = [
     id: 'privacidade',
     title: 'Privacidade e armazenamento local',
     paragraphs: [
-      'Este site não possui formulários, não cria contas e não coleta dados pessoais identificáveis.',
-      'O navegador guarda localmente apenas a preferência de tema (claro ou escuro). Nenhum dado é enviado a terceiros e não há rastreamento publicitário.',
+      'Este site não possui formulários, não cria contas e não coleta dados pessoais identificáveis. Nenhum dado é enviado a terceiros e não há rastreamento publicitário.',
       'Um service worker armazena arquivos do site em cache para permitir carregamento mais rápido e leitura offline. Esse cache pode ser apagado a qualquer momento nas configurações do navegador.'
     ]
   },

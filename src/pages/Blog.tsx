@@ -74,7 +74,7 @@ export function Blog() {
                 value={query}
                 onChange={event => setQuery(event.target.value)}
                 placeholder="Título, resumo ou tema"
-                className="w-full border border-rule bg-raised py-2.5 pl-9 pr-9 text-ink placeholder:text-faint focus:border-brand-ink focus:outline-none"
+                className="h-11 w-full border border-rule bg-raised pl-9 pr-9 text-ink placeholder:text-faint focus:border-brand-ink focus:outline-none"
               />
               {query && (
                 <button
@@ -102,10 +102,10 @@ export function Blog() {
                     onClick={() => setCategory(filter.value)}
                     aria-pressed={isActive}
                     className={cn(
-                      'border px-3 py-1.5 text-sm transition-colors',
+                      'inline-flex h-11 items-center border px-4 text-sm transition-colors',
                       isActive
-                        ? 'border-brand-ink bg-brand-ink text-on-brand-ink'
-                        : 'border-rule text-muted hover:border-brand-ink hover:text-ink'
+                        ? 'border-brand-dim bg-brand-wash text-brand-ink shadow-[0_0_16px_rgb(92_189_191/0.12)]'
+                        : 'border-rule text-muted hover:border-brand-dim hover:text-ink'
                     )}
                   >
                     {filter.label}
@@ -123,20 +123,20 @@ export function Blog() {
         </p>
 
         {results.length > 0 ? (
-          <ol className="mt-4 border-t border-rule">
+          <ol className="mt-6 grid gap-5">
             {results.map((post, index) => (
               <Reveal as="li" key={post.slug} delay={Math.min(index * 0.04, 0.24)}>
-                <article className="border-b border-rule">
+                <article>
                   <Link
                     to={`/blog/${post.slug}`}
-                    className="group grid gap-3 py-8 md:grid-cols-[10rem_1fr] md:gap-10"
+                    className="sheet sheet-interactive group grid gap-4 p-7 md:grid-cols-[11rem_1fr] md:gap-10 md:p-8"
                   >
-                    <div className="flex flex-col gap-1 text-xs text-muted">
+                    <div className="flex flex-row flex-wrap gap-x-4 gap-y-1 text-xs text-muted md:flex-col md:gap-2 md:border-r md:border-rule md:pr-6">
+                      <span className="eyebrow eyebrow-lum">{CATEGORY_LABELS[post.categoria]}</span>
                       <time dateTime={post.data} className="tabular">
                         {formatDate(post.data)}
                       </time>
-                      <span className="eyebrow text-brand-ink">{CATEGORY_LABELS[post.categoria]}</span>
-                      <span className="tabular">{post.tempoLeitura} min de leitura</span>
+                      <span className="tabular text-faint">{post.tempoLeitura} min de leitura</span>
                     </div>
 
                     <div>
