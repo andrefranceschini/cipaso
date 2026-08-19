@@ -1,264 +1,164 @@
-# Guia de Edição - Memorial CIPASO
+# Guia de edição — Memorial CIPASO
 
-Este site é **totalmente estático** e **não usa banco de dados**. Você edita o conteúdo diretamente nos arquivos TypeScript.
+O site é estático: não há banco de dados nem painel administrativo. Todo o conteúdo vem de
+arquivos do repositório, e scripts de geração transformam esses arquivos nos dados que a
+aplicação consome.
 
----
-
-## 📝 Como Editar Conteúdo
-
-### 1. Citações do Dia
-
-**Arquivo:** [src/data/quotes.ts](src/data/quotes.ts)
-
-```typescript
-export const quotes: Quote[] = [
-  {
-    id: 1,
-    content: 'Texto da citação aqui...',
-    author: 'Prof. Valter Franceschini'
-  },
-  // Adicione mais citações aqui
-]
+```
+posts/*.md                     → src/data/blog.json        (artigos)
+public/uploads/**              → src/data/files.json       (acervo)
+src/data/acervo.catalogo.json  → metadados lidos dos PDFs
+src/data/acervo.overrides.json → correções manuais do acervo
+src/data/quotes.ts             → citações do dia
 ```
 
-**Para adicionar uma nova citação:**
-1. Abra `src/data/quotes.ts`
-2. Copie um objeto existente
-3. Mude o `id` para o próximo número
-4. Edite `content` e `author`
-5. Salve o arquivo
+Depois de qualquer alteração de conteúdo, rode `npm run generate` (o `npm run dev` e o
+`npm run build` já fazem isso automaticamente).
 
 ---
 
-### 2. Posts e Notícias
+## 1. Publicar um artigo
 
-**Arquivo:** [src/data/posts.ts](src/data/posts.ts)
+Crie um arquivo `.md` em `posts/` com frontmatter:
 
-```typescript
-export const posts: Post[] = [
-  {
-    id: 1,
-    title: 'Título do Post',
-    slug: 'titulo-do-post', // URL amigável
-    excerpt: 'Resumo curto...',
-    type: 'noticia', // ou 'blog'
-    date: '2024-01-22',
-    author: 'CIPASO',
-    content: `
-      <h2>Título da Seção</h2>
-      <p>Parágrafo de texto...</p>
-      <ul>
-        <li>Item de lista</li>
-      </ul>
-    `
-  },
-  // Adicione mais posts aqui
-]
+```md
+---
+titulo: Título do artigo
+slug: titulo-do-artigo
+resumo: Uma linha que aparece na listagem e nos resultados de busca.
+autor: Prof. Valter Franceschini
+data: 2026-01-24
+categoria: pesquisa
+tags: parapsicologia, mente, pesquisa
+---
+
+Texto do artigo em Markdown: parágrafos, `## títulos`, listas com `-`,
+citações com `>`, **negrito** e [links](https://exemplo.com).
 ```
 
-**Você pode usar HTML no campo `content`:**
-- `<h2>`, `<h3>` → Títulos
-- `<p>` → Parágrafos
-- `<ul><li>` → Listas
-- `<strong>` → Negrito
-- `<em>` → Itálico
-- `<blockquote>` → Citações
+Regras que o gerador aplica:
+
+- `categoria` precisa ser `pesquisa`, `desenvolvimento` ou `institucional`.
+- `data` no formato `AAAA-MM-DD`.
+- `slug` define a URL (`/blog/slug`); se omitido, é derivado do título.
+- O tempo de leitura é calculado automaticamente.
+- Se houver arquivos em `posts/` e nenhum for válido, o build falha — em vez de publicar
+  um blog vazio silenciosamente.
+
+Verifique com `npm run update-blog`.
 
 ---
 
-### 3. Arquivos do Acervo
+## 2. Adicionar itens ao acervo
 
-**Arquivo:** [src/data/archive.ts](src/data/archive.ts)
-
-```typescript
-export const archiveFiles: ArchiveFile[] = [
-  {
-    id: 1,
-    title: 'Nome do Arquivo',
-    description: 'Descrição detalhada...',
-    filePath: '/uploads/documentos/arquivo.pdf', // Caminho do arquivo
-    category: 'documentos', // Ver categorias abaixo
-    fileType: 'pdf', // Extensão
-    publicationDate: '1989-03-15',
-    featured: true, // Aparece na home?
-    tags: ['tag1', 'tag2', 'tag3']
-  },
-  // Adicione mais arquivos aqui
-]
-```
-
-**Categorias disponíveis:**
-- `documentos` → Textos & Documentos
-- `imagens` → Imagens Históricas
-- `audios` → Fitas de Relaxamento
-- `videos` → Filmagens
-- `hemeroteca` → Diário de Sorocaba
-- `publicacoes` → Publicações Parâmetros
-
----
-
-## 📁 Como Adicionar Arquivos (PDFs, Imagens, Áudios, Vídeos)
-
-### Passo 1: Coloque o arquivo na pasta correta
+1. Coloque o arquivo na pasta correspondente:
 
 ```
 public/uploads/
-├── documentos/     → Coloque PDFs, DOCs aqui
-├── imagens/        → Coloque JPG, PNG aqui
-├── audios/         → Coloque MP3, WAV aqui
-├── videos/         → Coloque MP4, AVI aqui
-├── hemeroteca/     → Recortes de jornal (imagens)
-└── publicacoes/    → Apostilas, livros (PDFs)
+├── documentos/   → PDFs de texto
+├── imagens/      → JPG, PNG, WebP
+├── audios/       → MP3, WAV, M4A
+├── videos/       → MP4, WebM
+├── hemeroteca/   → recortes de jornal
+└── publicacoes/  → colunas e publicações em PDF
 ```
 
-**Exemplo:**
-```
-public/uploads/imagens/sede-1995.jpg
-```
+2. Rode `npm run update-files`. O item aparece no acervo automaticamente — nada precisa
+   ser registrado à mão.
 
-### Passo 2: Registre o arquivo em `src/data/archive.ts`
+### De onde vêm título, data e origem
 
-```typescript
-{
-  id: 7, // Próximo ID disponível
-  title: 'Foto da Sede - 1995',
-  description: 'Fotografia histórica da sede do CIPASO.',
-  filePath: '/uploads/imagens/sede-1995.jpg', // Caminho relativo
-  category: 'imagens',
-  fileType: 'jpg',
-  publicationDate: '1995-08-20',
-  featured: false,
-  tags: ['sede', 'fotografia', '1995']
-}
-```
-
-### Passo 3: Salve e recarregue o site
-
-O arquivo aparecerá automaticamente no acervo.
-
----
-
-## 🎨 Personalizar Cores
-
-**Arquivo:** [src/index.css](src/index.css)
-
-```css
-@theme {
-  --color-primary: #E9A356;      /* Ouro */
-  --color-secondary: #F4B068;    /* Laranja */
-  --color-background: #FBE4CB;   /* Papel (Light) */
-  --color-foreground: #2D241E;   /* Texto (Light) */
-  /* ... */
-}
-```
-
-Mude os valores hexadecimais para personalizar as cores.
-
----
-
-## 🖼️ Trocar Foto do Prof. Valter
-
-**Arquivo:** [src/components/home/AboutValter.tsx](src/components/home/AboutValter.tsx)
-
-Linha 2:
-```typescript
-import valterPhoto from '@/assets/png/vaf/VAF-1.jpg'
-```
-
-**Para trocar:**
-1. Coloque nova foto em `src/assets/png/vaf/`
-2. Mude o caminho no import
-3. Salve
-
----
-
-## 🚀 Comandos Úteis
+Os PDFs das colunas contêm o texto original. O comando `npm run catalog` lê cada PDF e grava
+`src/data/acervo.catalogo.json` com título, data de publicação, veículo e um resumo. Rode-o
+sempre que adicionar novos PDFs:
 
 ```bash
-# Desenvolvimento (servidor local)
-npm run dev
-# Acesse: http://localhost:5174
+npm run catalog       # lê os PDFs e atualiza o catálogo
+npm run update-files  # regenera o acervo com os novos metadados
+```
 
-# Build de produção (gera arquivos otimizados)
-npm run build
-# Arquivos gerados em: dist/
+### Corrigir metadados à mão
 
-# Testar build localmente
-npm run preview
+Para ajustar qualquer item, edite `src/data/acervo.overrides.json` usando o **nome do arquivo**
+como chave. O que estiver aqui tem prioridade sobre o catálogo automático:
+
+```json
+{
+  "paraps01-05.pdf": {
+    "titulo": "Erros ou experiências de aprendizado?",
+    "data": "2001-03-28",
+    "descricao": "Coluna sobre o medo de errar como causa da inação.",
+    "serie": "Diário de Sorocaba"
+  }
+}
+```
+
+Use `"data": null` quando não houver data conhecida.
+
+---
+
+## 3. Citações do dia
+
+Edite `src/data/quotes.ts`. A citação exibida é escolhida pelo dia do ano — todos os
+visitantes veem a mesma no mesmo dia.
+
+```ts
+export const quotes: Quote[] = [
+  { id: 1, content: 'Texto da citação.', author: 'Prof. Valter Franceschini' }
+]
 ```
 
 ---
 
-## 📤 Deploy (Publicar o Site)
+## 4. Aparência
 
-### Opção 1: Hostinger (FTP)
+As cores e a tipografia ficam em `src/index.css`, no bloco de variáveis `:root` (tema claro)
+e `.dark` (tema escuro):
 
-1. Execute `npm run build`
-2. Faça upload da pasta `dist/` para `public_html/` na Hostinger
-3. Pronto!
-
-### Opção 2: Netlify / Vercel (Grátis)
-
-1. Conecte seu repositório Git
-2. Configure build command: `npm run build`
-3. Configure publish directory: `dist`
-4. Deploy automático a cada commit
-
----
-
-## ❓ Dúvidas Comuns
-
-**P: Como adiciono um novo autor nas citações?**
-R: Basta mudar o campo `author` em `src/data/quotes.ts`
-
-**P: Posso usar vídeos do YouTube?**
-R: Sim! Use um player embed ou registre o link em `archive.ts` com `fileType: 'youtube'`
-
-**P: O que acontece se eu excluir um arquivo de `uploads/`?**
-R: O link ficará quebrado. Remova também o registro em `src/data/archive.ts`
-
-**P: Como faço backup do conteúdo?**
-R: Copie as pastas `src/data/` e `public/uploads/` para um local seguro
-
----
-
-## 🔒 Segurança
-
-✅ **Vantagens desta abordagem:**
-- Sem banco de dados = Sem risco de SQL injection
-- Sem backend = Sem risco de invasão de servidor
-- Arquivos estáticos = Deploy simples e rápido
-- Versionamento fácil com Git
-
-⚠️ **Lembre-se:**
-- Não coloque informações sensíveis nos arquivos TS
-- Faça backup regular de `src/data/` e `public/uploads/`
-- Use Git para versionar as mudanças
-
----
-
-## 📚 Estrutura de Arquivos
-
+```css
+:root {
+  --paper: #f7f4ef;      /* fundo */
+  --ink: #16181a;        /* texto */
+  --brand: #5cbdbf;      /* turquesa institucional */
+  --brand-ink: #0e6a6d;  /* turquesa com contraste para texto e botões */
+}
 ```
-src/
-├── data/
-│   ├── quotes.ts      ← EDITE: Citações
-│   ├── posts.ts       ← EDITE: Posts/Notícias
-│   └── archive.ts     ← EDITE: Arquivos do acervo
-├── assets/
-│   └── png/vaf/       ← COLOQUE: Fotos do Prof. Valter
-└── ...
 
-public/
-└── uploads/
-    ├── documentos/    ← COLOQUE: PDFs
-    ├── imagens/       ← COLOQUE: Fotos
-    ├── audios/        ← COLOQUE: MP3s
-    ├── videos/        ← COLOQUE: MP4s
-    ├── hemeroteca/    ← COLOQUE: Recortes de jornal
-    └── publicacoes/   ← COLOQUE: Apostilas
+Ao mudar qualquer cor, confira o contraste (mínimo 4.5:1 para texto). As fontes são
+`Sutro W01` (títulos) e `Inter` (texto).
+
+Para trocar as fotos do Prof. Valter, substitua os arquivos em `src/assets/png/vaf/`.
+
+Se o logotipo mudar, rode `npm run assets` para regerar os ícones do PWA e a imagem de
+compartilhamento (`public/og-image.png`).
+
+---
+
+## 5. Comandos
+
+```bash
+npm run dev        # servidor local
+npm run build      # build de produção em dist/
+npm run preview    # testa o build local
+npm run lint       # análise estática
+npm run typecheck  # checagem de tipos
+npm run generate   # regenera acervo, blog e sitemaps
+npm run catalog    # relê os PDFs e atualiza o catálogo do acervo
+npm run assets     # regera ícones PWA e imagem Open Graph
 ```
 
 ---
 
-**Desenvolvido com simplicidade e segurança para o Memorial CIPASO.**
+## 6. Publicação
+
+O deploy é automático: todo push na branch `main` dispara o workflow
+`.github/workflows/deploy.yml`, que roda lint, build e envia `dist/` por FTP para a Hostinger.
+
+- O envio é incremental: só sobe o que mudou desde o último deploy.
+- O acervo (`uploads/`) **não** vai no deploy do dia a dia. Depois de adicionar arquivos novos,
+  abra **Actions → Deploy cipaso.com → Run workflow** e marque *sincronizar_acervo*.
+- Ao final, o workflow confere se `https://cipaso.com` responde 200.
+
+Secrets no repositório: `HOSTINGER_HOST`, `HOSTINGER_USER` e `HOSTINGER_PASS` (FTP).
+Se a porta de FTP não for a 21, crie o secret `HOSTINGER_FTP_PORT`. Se o site não estiver em
+`public_html/`, crie a variable `HOSTINGER_FTP_PATH`.

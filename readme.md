@@ -1,287 +1,102 @@
 # Memorial Digital CIPASO
 
-> Centro de Investigação Parapsicológica de Sorocaba — Acervo Histórico e Museu Virtual
+> Centro de Investigação Parapsicológica de Sorocaba — acervo histórico e memorial digital
 
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite)](https://vite.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4_beta-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite)](https://vite.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
 
 ---
 
-## 🎯 Sobre o Projeto
+## Sobre
 
-O **Memorial Digital CIPASO** é um site **totalmente estático** (JAMstack) desenvolvido para preservar a memória histórica do Centro de Investigação Parapsicológica de Sorocaba, fundado em 1989.
+Site estático que preserva o acervo do CIPASO (1989–2016) e o trabalho do Prof. Valter Álfredo
+Franceschini: 240 colunas de parapsicologia publicadas no Diário de Sorocaba e no Jornal
+Ipanema entre 1997 e 2006, artigos transcritos e registros audiovisuais.
 
-### ✨ Funcionalidades
+Não há banco de dados nem backend: o conteúdo vive no repositório e é transformado em JSON por
+scripts de geração durante o build.
 
-- **Acervo Digital Completo:** Documentos, imagens, áudios, vídeos, publicações e hemeroteca
-- **Citações Inspiradoras:** Widget com frases do Prof. Valter Franceschini
-- **Design Responsivo:** Mobile-first, funciona perfeitamente em todos os dispositivos
-- **Dark Mode:** Tema claro/escuro com persistência
-- **PWA:** Site instalável e funcional offline
-- **Zero Banco de Dados:** Conteúdo editável em arquivos TypeScript
+### O que o site faz
 
-### 🛠️ Tecnologias
-
-- React 18.3 + TypeScript 5.7
-- Vite 6.0 (build tool ultrarrápido)
-- Tailwind CSS v4 (beta) - Design system customizado
-- Framer Motion (animações fluidas)
-- React Router DOM (navegação SPA)
+- **Acervo consultável** — busca, filtro por origem, ordenação cronológica e leitor de PDF no navegador.
+- **Catalogação automática** — o texto dos PDFs é lido para extrair título, data e veículo de publicação.
+- **Artigos** — Markdown em `posts/`, renderizado sem `dangerouslySetInnerHTML`.
+- **Tema claro/escuro** — aplicado antes da primeira pintura, sem flash.
+- **Acessibilidade** — navegação por teclado, foco visível, contraste AA verificado (axe-core sem violações).
+- **SEO** — canônicas, Open Graph, JSON-LD (Organization, Article, BreadcrumbList) e sitemaps gerados.
+- **PWA** — instalável, com o shell da aplicação em cache (o acervo fica sob demanda).
 
 ---
 
-## 🚀 Instalação
-
-### 1. Clonar e Instalar
+## Uso
 
 ```bash
-# Instalar dependências
 npm install
-
-# Iniciar servidor de desenvolvimento
-npm run dev
+npm run dev        # http://localhost:5173
 ```
 
-Acesse: **http://localhost:5173**
-
-### 2. Comandos Disponíveis
+### Comandos
 
 ```bash
-npm run dev       # Servidor de desenvolvimento
-npm run build     # Build de produção (gera pasta dist/)
-npm run preview   # Testar build localmente
-npm run lint      # Verificar código
+npm run dev        # servidor de desenvolvimento
+npm run build      # build de produção em dist/
+npm run preview    # testa o build local
+npm run lint       # ESLint
+npm run typecheck  # TypeScript
+npm run generate   # regenera acervo, blog e sitemaps
+npm run catalog    # relê os PDFs e atualiza os metadados do acervo
+npm run assets     # regera ícones do PWA e imagem Open Graph
 ```
 
 ---
 
-## 📝 Como Editar Conteúdo
-
-**⚠️ IMPORTANTE:** Este site NÃO usa banco de dados. Todo conteúdo é editado diretamente em arquivos TypeScript.
-
-### 📌 Editar Citações
-
-**Arquivo:** [src/data/quotes.ts](src/data/quotes.ts)
-
-```typescript
-export const quotes: Quote[] = [
-  {
-    id: 1,
-    content: 'Texto da citação...',
-    author: 'Prof. Valter Franceschini'
-  },
-  // Adicione mais aqui
-]
-```
-
-### 📰 Editar Posts/Notícias
-
-**Arquivo:** [src/data/posts.ts](src/data/posts.ts)
-
-```typescript
-export const posts: Post[] = [
-  {
-    id: 1,
-    title: 'Título do Post',
-    slug: 'titulo-do-post',
-    excerpt: 'Resumo...',
-    content: `<h2>HTML permitido aqui</h2><p>...</p>`
-  }
-]
-```
-
-### 📁 Adicionar Arquivos do Acervo
-
-**Passo 1:** Coloque o arquivo em `public/uploads/<categoria>/`
+## Estrutura
 
 ```
-public/uploads/
-├── documentos/     → PDFs, DOCs
-├── imagens/        → JPG, PNG
-├── audios/         → MP3, WAV
-├── videos/         → MP4
-├── hemeroteca/     → Recortes de jornal
-└── publicacoes/    → Apostilas, livros
+posts/                        artigos em Markdown (fonte do blog)
+public/uploads/               acervo digitalizado (PDFs, vídeo)
+public/.htaccess              rotas do SPA, cache e cabeçalhos no Apache
+scripts/
+  generateFilesJson.js        varre uploads/ e monta o acervo
+  catalogPublications.js      extrai título, data e veículo dos PDFs
+  generateBlogJson.js         lê posts/*.md e monta o blog
+  generateSitemap.js          sitemaps de páginas, artigos e PDFs
+  generateBrandAssets.js      ícones do PWA e imagem Open Graph
+src/
+  components/                 layout, UI, acervo e blog
+  data/                       JSON gerado + citações + overrides do acervo
+  lib/                        utilidades, tema, markdown e movimento
+  pages/                      Home, Acervo, Blog, BlogPost, About, Legal, NotFound
+  index.css                   design system (tokens, tipografia, componentes)
 ```
 
-**Passo 2:** Registre em [src/data/archive.ts](src/data/archive.ts)
-
-```typescript
-{
-  id: 7,
-  title: 'Nome do Arquivo',
-  description: 'Descrição...',
-  filePath: '/uploads/imagens/foto.jpg',
-  category: 'imagens',
-  fileType: 'jpg',
-  publicationDate: '1995-08-20',
-  featured: false, // true = aparece na home
-  tags: ['tag1', 'tag2']
-}
-```
-
-**Veja o guia completo:** [README-EDICAO.md](README-EDICAO.md)
+Para editar conteúdo, veja **[README-EDICAO.md](README-EDICAO.md)**.
 
 ---
 
-## 🎨 Personalizar Design
+## Deploy
 
-### Cores Institucionais (CIPASO)
+Push na `main` dispara `.github/workflows/deploy.yml`: lint, build e envio de `dist/` por FTP
+para a Hostinger. O deploy nativo por Git da Hostinger não resolve sozinho porque não executa
+`npm run build` — o build fica no CI e só o resultado é publicado.
 
-**Arquivo:** [src/index.css](src/index.css)
+- Envio incremental: a cada deploy sobem apenas os arquivos alterados.
+- `uploads/` fica fora do envio automático (67 MB já presentes no servidor, e nada é apagado lá).
+  Ao adicionar itens ao acervo, rode o workflow manualmente marcando **sincronizar_acervo**.
+- Ao final, o workflow confere se `https://cipaso.com` responde 200.
 
-```css
-@theme {
-  --color-primary: #E9A356;      /* Ouro institucional */
-  --color-secondary: #F4B068;    /* Laranja terroso */
-  --color-background: #FBE4CB;   /* Papel/Pergaminho (light) */
-  --color-foreground: #2D241E;   /* Texto escuro (light) */
-}
-```
-
-### Trocar Foto do Prof. Valter Franceschini
-
-**Arquivo:** [src/components/home/AboutValter.tsx](src/components/home/AboutValter.tsx:2)
-
-```typescript
-import valterPhoto from '@/assets/png/vaf/VAF-1.jpg' // ← Mude aqui
-```
+Secrets: `HOSTINGER_HOST`, `HOSTINGER_USER` e `HOSTINGER_PASS` (credenciais de FTP).
+Opcionais: secret `HOSTINGER_FTP_PORT` (padrão 21) e variables `HOSTINGER_FTP_PATH`
+(padrão `public_html/`) e `HOSTINGER_FTP_PROTOCOL` (padrão `ftps`).
 
 ---
 
-## 📤 Deploy (Publicar o Site)
+## Decisões técnicas
 
-### Opção 1: Netlify (Recomendado - Grátis)
-
-1. Conecte seu repositório Git no [Netlify](https://netlify.com)
-2. Configure:
-   - Build command: `npm run build`
-   - Publish directory: `dist`
-3. Deploy automático!
-
-### Opção 2: Vercel (Grátis)
-
-1. Conecte repo no [Vercel](https://vercel.com)
-2. Deploy automático (detecta Vite automaticamente)
-
-### Opção 3: Hostinger (Manual via FTP)
-
-```bash
-# Gerar build
-npm run build
-
-# Fazer upload da pasta dist/ para public_html/ via FTP
-```
-
-**Configurar `.htaccess` para SPA:**
-
-```apache
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
-</IfModule>
-```
-
----
-
-## 📂 Estrutura do Projeto
-
-```
-Front-End/
-├── public/
-│   └── uploads/              ← COLOQUE ARQUIVOS AQUI
-│       ├── documentos/
-│       ├── imagens/
-│       ├── audios/
-│       ├── videos/
-│       ├── hemeroteca/
-│       └── publicacoes/
-├── src/
-│   ├── data/                 ← EDITE CONTEÚDO AQUI
-│   │   ├── quotes.ts         (Citações)
-│   │   ├── posts.ts          (Posts/Notícias)
-│   │   └── archive.ts        (Arquivos do acervo)
-│   ├── components/
-│   │   ├── layout/           (Header, Footer)
-│   │   └── home/             (DailyQuote, AboutValter)
-│   ├── pages/
-│   │   └── Home.tsx
-│   ├── hooks/
-│   │   └── useTheme.ts       (Dark mode)
-│   ├── lib/
-│   │   └── utils.ts          (Helpers)
-│   ├── types/
-│   │   └── index.ts
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css             (Design system)
-├── README-EDICAO.md          ← GUIA COMPLETO DE EDIÇÃO
-└── package.json
-```
-
----
-
-## 🔒 Segurança
-
-### Vantagens da Arquitetura Estática
-
-✅ **Sem banco de dados** → Impossível sofrer SQL injection
-✅ **Sem backend** → Superfície de ataque zero
-✅ **Arquivos estáticos** → Performance máxima
-✅ **Hospedagem gratuita** → Netlify, Vercel, GitHub Pages
-✅ **Versionamento fácil** → Git rastreia todas as mudanças
-
-### Backups
-
-Faça backup regular de:
-- `src/data/` (conteúdo editável)
-- `public/uploads/` (arquivos do acervo)
-
-Use Git para versionar as mudanças.
-
----
-
-## 🎯 Roadmap
-
-- [x] Setup inicial do projeto
-- [x] Design system (cores CIPASO)
-- [x] Sistema de dados estáticos
-- [x] Home page completa
-- [x] Seção Prof. Valter Franceschini
-- [x] Dark mode toggle
-- [ ] Página do Acervo (filtros + busca)
-- [ ] Player de áudio para fitas de relaxamento
-- [ ] Modal de visualização de arquivos
-- [ ] PWA completo (service worker)
-- [ ] Blog com posts completos
-
----
-
-## 🏛️ Informações Institucionais
-
-**CIPASO - Centro de Investigação Parapsicológica de Sorocaba**
-- CNPJ: 58.984.089/0001-58
-- Fundação: 1989
-- Localização: Rua Oswaldo Segamarchi, 15, Jd. Santa Rosália, Sorocaba/SP
-
-**Parâmetros Holísticos de Formação Humana LTDA.**
-- CNPJ: 67.361.410/0001-39
-- Parceira institucional desde 1989
-
----
-
-## 📞 Contato
-
-Para dúvidas técnicas sobre este memorial digital, abra uma issue no repositório.
-
----
-
-**Memorial Digital desenvolvido com respeito à memória do Prof. Valter Franceschini e à história do CIPASO.**
-
-© 2024 CIPASO. Todos os direitos reservados.
+- **Sem backend** — acervo histórico não muda com frequência; build estático elimina superfície de ataque e custo.
+- **Dados gerados no build** — o repositório é a fonte da verdade; o gerador falha o build se `posts/` tiver arquivos inválidos, em vez de publicar um blog vazio.
+- **Metadados do acervo em camadas** — `acervo.overrides.json` (manual) tem prioridade sobre `acervo.catalogo.json` (extraído dos PDFs), que tem prioridade sobre o nome do arquivo.
+- **Rotas com carregamento sob demanda** — só a home entra no bundle inicial.
+- **Movimento contido** — animações curtas, com respeito a `prefers-reduced-motion`.
