@@ -1,0 +1,12 @@
+# Normaliza fim de linha no repositório: o parser de frontmatter dos posts
+# espera LF, e arquivos criados no Windows chegavam com CRLF.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.mp4 binary
+*.mp3 binary
+*.ttf binary
+*.woff2 binary
