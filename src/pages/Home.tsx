@@ -208,8 +208,10 @@ export function Home() {
             />
           </Reveal>
 
-          <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:gap-16">
-            <Reveal className="space-y-5 text-lg leading-relaxed text-muted">
+          {/* Colunas com a mesma altura: a citação absorve a folga à esquerda
+              e os quatro cartões dividem igualmente a altura à direita */}
+          <div className="mt-10 grid items-stretch gap-8 lg:grid-cols-2 lg:gap-10">
+            <Reveal className="flex h-full flex-col gap-5 text-lg leading-relaxed text-muted">
               <p>
                 O CIPASO estudava, identificava e classificava os fenômenos exteriorizados através da
                 paranormalidade — a capacidade de percepção hiperestésica e de conhecimento extrassensorial.
@@ -219,7 +221,7 @@ export function Home() {
                 sistemática. Este memorial preserva esse material e o mantém acessível a pesquisadores, alunos e
                 familiares.
               </p>
-              <figure className="sheet p-6">
+              <figure className="sheet flex flex-1 flex-col justify-center p-6">
                 <figcaption className="eyebrow">A 3ª Lei da Mente</figcaption>
                 <blockquote className="mt-4 font-display text-xl leading-snug text-ink">
                   “O seu corpo reage de acordo com como age a sua mente.”
@@ -231,10 +233,10 @@ export function Home() {
               </figure>
             </Reveal>
 
-            <Reveal delay={0.08}>
-              <dl className="grid gap-5 sm:grid-cols-2">
+            <Reveal delay={0.08} className="h-full">
+              <dl className="grid h-full auto-rows-fr gap-5 sm:grid-cols-2">
                 {values.map((value, index) => (
-                  <div key={value.term} className="sheet p-6">
+                  <div key={value.term} className="sheet flex flex-col p-6">
                     <dt className="flex items-baseline gap-3">
                       <span className="font-display text-xl leading-none text-brand-ink tabular">
                         {String(index + 1).padStart(2, '0')}
